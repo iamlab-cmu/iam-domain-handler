@@ -54,7 +54,12 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
+  DoesSkillExist.srv
   GetCurrentState.srv
+  RunSkill.srv
+  GetSkillInfo.srv
+  RegisterSkill.srv
+  SetSkillStatus.srv
 )
 
 ## Generate actions in the 'action' folder
