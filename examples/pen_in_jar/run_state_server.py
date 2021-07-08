@@ -3,7 +3,6 @@ import quaternion as qt
 from franka_interface_msgs.msg import RobotState
 from geometry_msgs.msg import Pose
 
-
 from iam_domain_handler.state_server import StateServer
 
 
