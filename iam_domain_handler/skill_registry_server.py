@@ -16,7 +16,7 @@ class SkillRegistryServer:
         self._does_skill_exist_srv = rospy.Service('does_skill_exist', DoesSkillExist, self._does_skill_exist_srv_handler)
         self._register_skill_srv = rospy.Service('register_skill', RegisterSkill, self._register_skill_srv_handler)
         self._set_skill_status_srv = rospy.Service('set_skill_status', SetSkillStatus, self._set_skill_status_srv_handler)
-        self._get_skill_status_srv = rospy.Service('get_skill_info', GetSkillInfo, self._get_skill_status_srv_handler)
+        self._get_skill_status_srv = rospy.Service('get_skill_info', GetSkillInfo, self._get_skill_info_srv_handler)
 
         self._skill_registry = {}
 
@@ -38,7 +38,7 @@ class SkillRegistryServer:
         self._skill_registry[req.skill_id]['skill_status'] = req.skill_status
 
     def _get_skill_info_srv_handler(self, req):
-        return \
+        return req.skill_id, \
             self._skill_registry[req.skill_id]['skill_name'], \
             self._skill_registry[req.skill_id]['skill_param'], \
             self._skill_registry[req.skill_id]['skill_status']

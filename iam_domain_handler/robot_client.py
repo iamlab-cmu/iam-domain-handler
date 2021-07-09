@@ -16,7 +16,6 @@ class RobotClient:
         self._run_skill_srv_proxy = rospy.ServiceProxy(self._run_skill_srv_name, RunSkill)
 
         self._runnning_skill_id = None
-        self._req_run_skill_th = None
 
     def run_skill(self, skill_name, skill_param):
         assert self._runnning_skill_id is None, 'A skill is currently running!'
