@@ -1,6 +1,6 @@
 import rospy
 
-from domain_handler_msgs.srv import RegisterSkill, SetSkillStatus, GetSkillStatus, DoesSkillExist
+from domain_handler_msgs.srv import RegisterSkill, SetSkillStatus, GetSkillInfo, DoesSkillExist
 
 
 class SkillRegistryClient:
@@ -9,12 +9,12 @@ class SkillRegistryClient:
         self._does_skill_exist_srv_name = 'does_skill_exist'
         self._register_skill_srv_name = 'register_skill'
         self._set_skill_status_srv_name = 'set_skill_status'
-        self._get_skill_info_srv_name = 'get_skill_status'
+        self._get_skill_info_srv_name = 'get_skill_info'
         
         self._does_skill_exist_srv_proxy = rospy.ServiceProxy(self._does_skill_exist_srv_name, DoesSkillExist)
         self._register_skill_srv_proxy = rospy.ServiceProxy(self._register_skill_srv_name, RegisterSkill)
         self._set_skill_status_srv_proxy = rospy.ServiceProxy(self._set_skill_status_srv_name, SetSkillStatus)
-        self._get_skill_info_srv_proxy = rospy.ServiceProxy(self._get_skill_info_srv_name, GetSkillStatus)
+        self._get_skill_info_srv_proxy = rospy.ServiceProxy(self._get_skill_info_srv_name, GetSkillInfo)
 
     def does_skill_exist(self, skill_id):
         rospy.wait_for_service(self._does_skill_exist_srv_proxy)
@@ -31,3 +31,6 @@ class SkillRegistryClient:
     def get_skill_info(self, skill_id):
         rospy.wait_for_service(self._get_skill_info_srv_name)
         return self._get_skill_info_srv_proxy(skill_id)
+
+    def get_skill_status(self, skill_id):
+        return self.get_skill_info(skill_id).skill_status

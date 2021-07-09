@@ -12,7 +12,7 @@ class DomainClient:
     def state(self):
         return self._state_client.get_state()
 
-    def run_skill(self, skill_name, skill_param):
+    def run_skill(self, skill_name, skill_param=''):
         return self._robot_client.run_skill(skill_name, skill_param)
 
     def get_skill_status(self, skill_id):

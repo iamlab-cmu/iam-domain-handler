@@ -31,5 +31,4 @@ class RobotClient:
         return self._runnning_skill_id
 
     def get_skill_status(self, skill_id):
-        rospy.wait_for_service(self._get_skill_status_srv_name)
-        return self._get_skill_status_srv_proxy(skill_id).skill_status
+        return self._skill_registry_client.get_skill_status(skill_id)

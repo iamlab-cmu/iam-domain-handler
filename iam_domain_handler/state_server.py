@@ -17,6 +17,7 @@ class StateServer:
 
         self._state_srv = rospy.Service('get_current_state', GetCurrentState, self._state_srv_handler)
 
+        rospy.loginfo('Running State Server...')
         rospy.spin()
 
     def _sub_cb(self, data, handler):

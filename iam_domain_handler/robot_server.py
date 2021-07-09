@@ -5,9 +5,9 @@ from frankapy.proto_utils import sensor_proto2ros_msg, make_sensor_group_msg
 from frankapy.proto import PosePositionSensorMessage, JointPositionSensorMessage, ShouldTerminateSensorMessage
 from franka_interface_msgs.msg import SensorDataGroup
 
-from domain_handler_msgs.srv import RunSkill, BaseStreamTrajSkill, BaseGripperSkill
+from domain_handler_msgs.srv import RunSkill
 
-from iam_skills import CmdType
+from iam_skills import CmdType, BaseStreamTrajSkill, BaseGripperSkill
 from .state_client import StateClient
 from .skill_registry_client import SkillRegistryClient
 from .utils import EE_RigidTransform_from_state, joints_from_state
@@ -30,6 +30,9 @@ class RobotServer:
 
         self._run_skill_srv = rospy.Service('run_skill', RunSkill, self._run_skill_srv_handler)
 
+        rospy.loginfo('Running Robot Server...')
+        rospy.spin()
+
     def _run_policy_on_robot(self, init_state, policy, param, skill):
         if policy.cmd_type == CmdType.GRIPPER:
             gripper_cmd = policy(init_state)
@@ -39,6 +42,7 @@ class RobotServer:
                 self._fa.close_gripper()
             elif gripper_cmd['open_gripper'] is not None:
                 self._fa.open_gripper()
+            return 1
         else:
             if policy.cmd_type == CmdType.EE:
                 init_pose = EE_RigidTransform_from_state(init_state)
@@ -107,6 +111,8 @@ class RobotServer:
             )
             self._traj_sensor_pub.publish(ros_msg)
 
+            return t_step
+
     def _run_skill_srv_handler(self, req):
         skill_info = self._skill_registry_client.get_skill_info(req.skill_id)
         self._skill_registry_client.set_skill_status(req.skill_id, 'running')
@@ -116,7 +122,7 @@ class RobotServer:
         init_state = self._state_client.get_state()
         policy = skill.make_policy(init_state, skill_info.skill_param)
 
-        self._run_policy_on_robot(init_state, policy, skill_info.skill_param, skill)
+        t_step = self._run_policy_on_robot(init_state, policy, skill_info.skill_param, skill)
 
         end_state = self._state_client.get_state()
 

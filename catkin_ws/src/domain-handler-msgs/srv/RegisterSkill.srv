@@ -1,4 +1,4 @@
 string skill_name
 string skill_param
 ---
-string skill_status_id
+string skill_id
