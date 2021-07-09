@@ -22,7 +22,7 @@ class RobotServer:
         for skill in self._skills_dict.values():
             assert isinstance(skill, BaseStreamTrajSkill) or isinstance(skill, BaseGripperSkill)
 
-        self._fa = FrankaArm()
+        self._fa = FrankaArm(old_gripper=True)
         self._state_client = StateClient()
         self._skill_registry_client = SkillRegistryClient()
 
