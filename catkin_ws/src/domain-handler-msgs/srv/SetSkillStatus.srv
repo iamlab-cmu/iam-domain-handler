@@ -1,3 +1,4 @@
 string skill_id
 string skill_status
 ---
+string prev_skill_status

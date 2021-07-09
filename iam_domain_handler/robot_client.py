@@ -18,7 +18,8 @@ class RobotClient:
         self._runnning_skill_id = None
 
     def run_skill(self, skill_name, skill_param):
-        assert self._runnning_skill_id is None, 'A skill is currently running!'
+        if self._runnning_skill_id is not None:
+            assert self.get_skill_status(self._runnning_skill_id) in ('success', 'failure'), 'A skill is currently running!'
 
         self._runnning_skill_id = self._skill_registry_client.register_skill(skill_name, skill_param)
 

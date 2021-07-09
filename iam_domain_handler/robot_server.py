@@ -48,7 +48,7 @@ class RobotServer:
                 init_pose = EE_RigidTransform_from_state(init_state)
                 self._fa.goto_pose(
                     init_pose, 
-                    duration=policy.horizion, 
+                    duration=policy.horizon, 
                     dynamic=True, 
                     buffer_time=3
                 )
@@ -56,7 +56,7 @@ class RobotServer:
                 init_joints = joints_from_state(init_state)
                 self._fa.goto_joints(
                     init_joints, 
-                    duration=policy.horizion, 
+                    duration=policy.horizon, 
                     dynamic=True, 
                     buffer_time=3
                 )
@@ -130,4 +130,5 @@ class RobotServer:
             skill_status = 'success'
         else:
             skill_status = 'failure'
-        self._skill_status_client.set_skill_status(req.skill_id, skill_status)
+        self._skill_registry_client.set_skill_status(req.skill_id, skill_status)
+        return skill_status

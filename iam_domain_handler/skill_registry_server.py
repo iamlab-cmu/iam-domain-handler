@@ -47,6 +47,7 @@ class SkillRegistryServer:
         rospy.loginfo(f'Got req: Setting skill w/ id {req.skill_id}, name {skill_name}, param {skill_param} from {prev_skill_status} to {req.skill_status}')
 
         self._skill_registry[req.skill_id]['skill_status'] = req.skill_status
+        return prev_skill_status
 
     def _get_skill_info_srv_handler(self, req):
         skill_name = self._skill_registry[req.skill_id]['skill_name']
