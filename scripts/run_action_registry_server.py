@@ -1,5 +1,5 @@
-from iam_domain_handler.skill_registry_server import SkillRegistryServer
+from iam_domain_handler.action_registry_server import ActionRegistryServer
 
 
 if __name__ == '__main__':
-    skill_registry_server = SkillRegistryServer()
+    action_registry_server = ActionRegistryServer()

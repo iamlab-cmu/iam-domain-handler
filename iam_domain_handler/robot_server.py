@@ -9,7 +9,7 @@ from domain_handler_msgs.srv import RunSkill
 
 from iam_skills import CmdType, BaseStreamTrajSkill, BaseGripperSkill
 from .state_client import StateClient
-from .skill_registry_client import SkillRegistryClient
+from .action_registry_client import ActionRegistryClient
 from .utils import EE_RigidTransform_from_state, joints_from_state
 
 
@@ -24,7 +24,7 @@ class RobotServer:
 
         self._fa = FrankaArm(old_gripper=True)
         self._state_client = StateClient()
-        self._skill_registry_client = SkillRegistryClient()
+        self._action_registry_client = ActionRegistryClient()
 
         self._traj_sensor_pub = rospy.Publisher(FC.DEFAULT_SENSOR_PUBLISHER_TOPIC, SensorDataGroup, queue_size=1000)
 
@@ -114,21 +114,21 @@ class RobotServer:
             return t_step
 
     def _run_skill_srv_handler(self, req):
-        skill_info = self._skill_registry_client.get_skill_info(req.skill_id)
-        self._skill_registry_client.set_skill_status(req.skill_id, 'running')
+        skill_info = self._action_registry_client.get_action_info(req.skill_id)
+        self._action_registry_client.set_action_status(req.skill_id, 'running')
 
-        skill = self._skills_dict[skill_info.skill_name]
+        skill = self._skills_dict[skill_info.action_name]
         
         init_state = self._state_client.get_state()
-        policy = skill.make_policy(init_state, skill_info.skill_param)
+        policy = skill.make_policy(init_state, skill_info.action_param)
 
-        t_step = self._run_policy_on_robot(init_state, policy, skill_info.skill_param, skill)
+        t_step = self._run_policy_on_robot(init_state, policy, skill_info.action_param, skill)
 
         end_state = self._state_client.get_state()
 
-        if skill.skill_execution_successful(init_state, end_state, skill_info.skill_param, policy, t_step) > 0.5:
+        if skill.skill_execution_successful(init_state, end_state, skill_info.action_param, policy, t_step) > 0.5:
             skill_status = 'success'
         else:
             skill_status = 'failure'
-        self._skill_registry_client.set_skill_status(req.skill_id, skill_status)
+        self._action_registry_client.set_action_status(req.skill_id, skill_status)
         return skill_status

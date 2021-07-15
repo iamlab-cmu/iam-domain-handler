@@ -1,6 +1,6 @@
-string skill_id
+string action_id
 ---
-string skill_id
-string skill_name
-string skill_param
-string skill_status
+string action_id
+string action_name
+string action_param
+string action_status

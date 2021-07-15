@@ -1,4 +1,4 @@
-string skill_id
-string skill_status
+string action_id
+string action_status
 ---
-string prev_skill_status
+string prev_action_status

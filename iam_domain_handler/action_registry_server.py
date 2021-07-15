@@ -1,58 +1,58 @@
 import rospy
 from shortuuid import uuid
 
-from domain_handler_msgs.srv import RegisterSkill, SetSkillStatus, GetSkillInfo, DoesSkillExist
+from domain_handler_msgs.srv import RegisterAction, SetActionStatus, GetActionInfo, DoesActionExist
 
 from .state_client import StateClient
 
 
-class SkillRegistryServer:
+class ActionRegistryServer:
 
     def __init__(self):
-        rospy.init_node('skill_registry_server', anonymous=True)
+        rospy.init_node('action_registry_server', anonymous=True)
 
-        self._skill_registry = {}
+        self._action_registry = {}
 
         self._state_client = StateClient()
 
-        self._does_skill_exist_srv = rospy.Service('does_skill_exist', DoesSkillExist, self._does_skill_exist_srv_handler)
-        self._register_skill_srv = rospy.Service('register_skill', RegisterSkill, self._register_skill_srv_handler)
-        self._set_skill_status_srv = rospy.Service('set_skill_status', SetSkillStatus, self._set_skill_status_srv_handler)
-        self._get_skill_status_srv = rospy.Service('get_skill_info', GetSkillInfo, self._get_skill_info_srv_handler)
+        self._does_action_exist_srv = rospy.Service('does_action_exist', DoesActionExist, self._does_action_exist_srv_handler)
+        self._register_action_srv = rospy.Service('register_action', RegisterAction, self._register_action_srv_handler)
+        self._set_action_status_srv = rospy.Service('set_action_status', SetActionStatus, self._set_action_status_srv_handler)
+        self._get_action_status_srv = rospy.Service('get_action_info', GetActionInfo, self._get_action_info_srv_handler)
 
-        rospy.loginfo('Running Skill Registry Server...')
+        rospy.loginfo('Running Action Registry Server...')
         rospy.spin()
 
-    def _does_skill_exist_srv_handler(self, req):
-        skill_exists = req.skill_id in self._skill_registry
-        rospy.loginfo(f'Got req: Does Skill Exist? skill_id={req.skill_id} | ret: {skill_exists}')
-        return skill_exists
+    def _does_action_exist_srv_handler(self, req):
+        action_exists = req.action_id in self._action_registry
+        rospy.loginfo(f'Got req: Does Action Exist? action_id={req.action_id} | ret: {action_exists}')
+        return action_exists
 
-    def _register_skill_srv_handler(self, req):
-        skill_id = f'{req.skill_name}_{uuid()}'
-        rospy.loginfo(f'Got req: Registering skill {req.skill_name} with param {req.skill_param} | skill_id={skill_id}')
+    def _register_action_srv_handler(self, req):
+        action_id = f'{req.action_name}_{uuid()}'
+        rospy.loginfo(f'Got req: Registering action {req.action_name} with param {req.action_param} | action_id={action_id}')
 
-        self._skill_registry[skill_id] = {
-            'skill_name': req.skill_name,
-            'skill_param': req.skill_param,
-            'skill_status': 'registered'
+        self._action_registry[action_id] = {
+            'action_name': req.action_name,
+            'action_param': req.action_param,
+            'action_status': 'registered'
         }
 
-        return skill_id
+        return action_id
 
-    def _set_skill_status_srv_handler(self, req):
-        prev_skill_status = self._skill_registry[req.skill_id]['skill_status']
-        skill_name = self._skill_registry[req.skill_id]['skill_name']
-        skill_param = self._skill_registry[req.skill_id]['skill_param']
-        rospy.loginfo(f'Got req: Setting skill w/ id {req.skill_id}, name {skill_name}, param {skill_param} from {prev_skill_status} to {req.skill_status}')
+    def _set_action_status_srv_handler(self, req):
+        prev_action_status = self._action_registry[req.action_id]['action_status']
+        action_name = self._action_registry[req.action_id]['action_name']
+        action_param = self._action_registry[req.action_id]['action_param']
+        rospy.loginfo(f'Got req: Setting action w/ id {req.action_id}, name {action_name}, param {action_param} from {prev_action_status} to {req.action_status}')
 
-        self._skill_registry[req.skill_id]['skill_status'] = req.skill_status
-        return prev_skill_status
+        self._action_registry[req.action_id]['action_status'] = req.action_status
+        return prev_action_status
 
-    def _get_skill_info_srv_handler(self, req):
-        skill_name = self._skill_registry[req.skill_id]['skill_name']
-        skill_param = self._skill_registry[req.skill_id]['skill_param']
-        skill_status = self._skill_registry[req.skill_id]['skill_status']
-        rospy.loginfo(f'Got req: Returning skill info w/ id {req.skill_id}, name {skill_name}, param {skill_param}, status {skill_status}')
+    def _get_action_info_srv_handler(self, req):
+        action_name = self._action_registry[req.action_id]['action_name']
+        action_param = self._action_registry[req.action_id]['action_param']
+        action_status = self._action_registry[req.action_id]['action_status']
+        rospy.loginfo(f'Got req: Returning action info w/ id {req.action_id}, name {action_name}, param {action_param}, status {action_status}')
         
-        return req.skill_id, skill_name, skill_param, skill_status
+        return req.action_id, action_name, action_param, action_status
