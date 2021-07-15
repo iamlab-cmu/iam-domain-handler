@@ -13,7 +13,7 @@ class SkillRegistryServer:
 
         self._skill_registry = {}
 
-        self._state_client = StateClient()
+        # self._state_client = StateClient()
 
         self._does_skill_exist_srv = rospy.Service('does_skill_exist', DoesSkillExist, self._does_skill_exist_srv_handler)
         self._register_skill_srv = rospy.Service('register_skill', RegisterSkill, self._register_skill_srv_handler)
