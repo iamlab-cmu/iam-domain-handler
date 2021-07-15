@@ -19,7 +19,7 @@ class StateServer:
 
         rospy.loginfo('Running State Server...')
         rospy.spin()
-
+    
     def _sub_cb(self, data, handler):
         for k, v in handler(data).items():
             self._state[k] = v

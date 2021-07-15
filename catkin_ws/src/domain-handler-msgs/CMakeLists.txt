@@ -61,12 +61,14 @@ add_message_files(
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  DoesSkillExist.srv
-  GetCurrentState.srv
+  DoesActionExist.srv
+  GetActionInfo.srv
+  GetCurrentState.srv 
+  GetHumanInterfaceCmd.srv
+  RegisterAction.srv
+  RunQuery.srv
   RunSkill.srv
-  GetSkillInfo.srv
-  RegisterSkill.srv
-  SetSkillStatus.srv
+  SetActionStatus.srv
 )
 
 ## Generate actions in the 'action' folder

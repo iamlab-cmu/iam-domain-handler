@@ -20,8 +20,8 @@ class DomainClient:
     def get_skill_status(self, skill_id):
         return self._robot_client.get_skill_status(skill_id)
     
-    def run_query(self, query_params={}):
-        return self._human_client.run_query(query_params)
+    def run_query(self, query_name, query_param):
+        return self._human_client.run_query(query_name, query_param)
     
-    def get_query_status(self, skill_id):
-        return self._human_client.get_query_status(skill_id)
+    def get_query_status(self, query_id):
+        return self._human_client.get_query_status(query_id)
