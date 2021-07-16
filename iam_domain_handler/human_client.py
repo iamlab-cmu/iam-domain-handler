@@ -24,9 +24,9 @@ class HumanClient:
         # Make this request async so we don't wait until query finishes
         def req_run_query():
             self._run_query_srv_proxy(self._runnning_query_id)
+            
         th = Thread(target=req_run_query)
         th.start()
-
 
         return self._runnning_query_id
 

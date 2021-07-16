@@ -1,4 +1,4 @@
-
+import json
 from domain_handler_msgs.msg import HumanInterfaceRequest, Button, Slider, TextInput, Bbox
 
 def from_dict_button_to_msg_button(button):
@@ -31,6 +31,7 @@ def from_trajs_to_msg_trajs(trajs):
     return []
 
 def params_to_human_interface_request_msg(params):
+    params = json.loads(params)
     hi_msg = HumanInterfaceRequest()   
     if 'buttons' in params:
         hi_msg.buttons = [from_dict_button_to_msg_button(button) for button in params['buttons']] 
@@ -56,26 +57,3 @@ def params_to_human_interface_request_msg(params):
         hi_msg.robot_joint_topic = params['robot_joint_topic']
     
     return hi_msg
-
-def human_interface_reply_handler(data):
-    '''
-    buttons, sliders, text_inputs, bboxes
-    '''
-    return_dict = dict()
-    buttons = data.buttons
-    for button in buttons:
-        name = button.name
-        return_dict[f'buttons:{name}'] = button.value
-    bboxes = data.bboxes
-    for bbox in bboxes:
-        name = bbox.name
-        return_dict[f'bboxes:{name}'] = bbox.value
-    sliders = data.sliders
-    for slider in sliders:
-        name = slider.name
-        return_dict[f'sliders:{name}'] = slider.value
-    text_inputs = data.text_inputs
-    for text_input in text_inputs:
-        name = text_input.name
-        return_dict[f'text_inputs:{name}'] = text_input.value
-    return return_dict
