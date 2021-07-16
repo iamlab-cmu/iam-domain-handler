@@ -93,10 +93,11 @@ if __name__ == '__main__':
         ('/reset_query_done_state', Confirmation, human_server_reset_handler),
     ]
     
-    robot_server_handlers = [
-        ('/set_state_trajectory', JointTrajectory, skill_trajectory_handler),
-        ('/state_trajectory_done_reset', Confirmation, skill_trajectory_done_reset_handler),
-    ]
+    # robot_server_handlers = [
+    #     ('/set_state_trajectory', JointTrajectory, skill_trajectory_handler),
+    #     ('/state_trajectory_done_reset', Confirmation, skill_trajectory_done_reset_handler),
+    # ]
+    robot_server_handlers = []
     
     sub_handlers = [
         ('/robot_state_publisher_node_1/robot_state', RobotState, robot_state_handler),

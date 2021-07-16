@@ -40,8 +40,9 @@ class HumanServer:
         while not query_not_done:
             cur_state = self._state_client.get_state()
             if cur_state.has_prop('query_done'):
+                rospy.loginfo('SUCCESS 0...')
                 query_not_done = cur_state['query_done'][0] > 0
             rate.sleep()
-
+        rospy.loginfo('SUCCESS...')
         self._action_registry_client.set_action_status(req.query_id, 'success')
         return 'success'
