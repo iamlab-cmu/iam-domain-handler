@@ -1,3 +1,6 @@
 [submodule "catkin_ws/src/franka-interface-msgs"]
 	path = catkin_ws/src/franka-interface-msgs
 	url = https://github.com/iamlab-cmu/franka-interface-msgs.git
+[submodule "catkin_ws/src/web-interface-msgs"]
+	path = catkin_ws/src/web-interface-msgs
+	url = https://github.com/iamlab-cmu/web-interface-msgs.git
