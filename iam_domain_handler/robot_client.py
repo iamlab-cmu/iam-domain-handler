@@ -2,7 +2,7 @@ from threading import Thread
 import rospy
 
 from domain_handler_msgs.srv import RunSkill, GetSkillTraj
-from domain_handler_msgs.msg import Confirmation
+from web_interface_msgs.msg import Confirmation
 from .action_registry_client import ActionRegistryClient
 
 class RobotClient:

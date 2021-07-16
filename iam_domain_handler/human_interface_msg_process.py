@@ -1,5 +1,5 @@
 import json
-from domain_handler_msgs.msg import HumanInterfaceRequest, Button, Slider, TextInput, Bbox
+from web_interface_msgs.msg import Request, Button, Slider, TextInput, Bbox
 
 def from_dict_button_to_msg_button(button):
     b = Button()
@@ -32,7 +32,7 @@ def from_trajs_to_msg_trajs(trajs):
 
 def params_to_human_interface_request_msg(params):
     params = json.loads(params)
-    hi_msg = HumanInterfaceRequest()   
+    hi_msg = Request()    
     if 'buttons' in params:
         hi_msg.buttons = [from_dict_button_to_msg_button(button) for button in params['buttons']] 
     if 'sliders' in params:

@@ -5,7 +5,7 @@ from franka_interface_msgs.msg import RobotState
 from geometry_msgs.msg import Pose
 from trajectory_msgs.msg import JointTrajectory
 
-from domain_handler_msgs.msg import HumanInterfaceReply, Confirmation
+from web_interface_msgs.msg import Reply, Confirmation
 from iam_domain_handler.state_server import StateServer
 from std_msgs.msg import Int32
 
@@ -88,7 +88,7 @@ def skill_trajectory_handler(data):
 
 if __name__ == '__main__':
     human_interface_handlers = [
-        ('/human_interface_reply', HumanInterfaceReply, human_interface_reply_handler),
+        ('/human_interface_reply', Reply, human_interface_reply_handler),
         ('/human_interface_confirmation', Confirmation, human_interface_confirmation_handler),
         ('/reset_query_done_state', Confirmation, human_server_reset_handler),
     ]
