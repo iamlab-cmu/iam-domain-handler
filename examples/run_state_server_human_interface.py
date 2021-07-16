@@ -3,7 +3,9 @@ import numpy as np
 import quaternion as qt
 from franka_interface_msgs.msg import RobotState
 from geometry_msgs.msg import Pose
-from domain_handler_msgs.msg import HumanInterfaceReply, HumanInterfaceConfirmation
+from trajectory_msgs.msg import JointTrajectory
+
+from domain_handler_msgs.msg import HumanInterfaceReply, Confirmation
 from iam_domain_handler.state_server import StateServer
 from std_msgs.msg import Int32
 
@@ -35,10 +37,9 @@ def human_interface_reply_handler(data):
     '''
     # Buttons
     buttons = data.buttons
-    button_clicked = None
+    button_values = None
     for button_idx, button in enumerate(buttons):
-        if button.value:
-            button_clicked = button_idx
+        button_values.append(button.value)
     # Sliders
     slider_values = []
     for slider in data.sliders:
@@ -55,14 +56,13 @@ def human_interface_reply_handler(data):
     # return_dict['text_inputs_value'] = [text_input.value]
     
     return {
-        'clicked_button_index' : button_clicked,
+        'button_values' : button_values,
         'slider_values' : slider_values,
         'bbox_values' : bbox_values,
     }
 
 
 def human_interface_confirmation_handler(data):
-    print("HANDLE")
     return {
         'query_done' : data.succeed,
     }
@@ -72,17 +72,34 @@ def human_server_reset_handler(data):
         'query_done' : data.succeed,
     }
 
+def skill_trajectory_done_reset_handler(data):
+    return {
+        'skill_trajectory_done' : False,
+    }
 
-def sub_cb(data, handler):
-    for k, v in handler(data).items():
-        print(k,v)
+def skill_trajectory_handler(data):
+    pts = []
+    for pt in data.points:
+        pts += list(pt.positions)
+    return {
+        'skill_trajectory' : pts,
+        'skill_trajectory_done' : True,
+    }
 
 if __name__ == '__main__':
+    human_interface_handlers = [
+        ('/human_interface_reply', HumanInterfaceReply, human_interface_reply_handler),
+        ('/human_interface_confirmation', Confirmation, human_interface_confirmation_handler),
+        ('/reset_query_done_state', Confirmation, human_server_reset_handler),
+    ]
+    
+    robot_server_handlers = [
+        ('/set_state_trajectory', JointTrajectory, skill_trajectory_handler),
+        ('/state_trajectory_done_reset', Confirmation, skill_trajectory_done_reset_handler),
+    ]
+    
     sub_handlers = [
         ('/robot_state_publisher_node_1/robot_state', RobotState, robot_state_handler),
         ('/pen_pose', Pose, pen_pose_handler),
-        ('/human_interface_reply', HumanInterfaceReply, human_interface_reply_handler),
-        ('/human_interface_confirmation', HumanInterfaceConfirmation, human_interface_confirmation_handler),
-        ('/reset_query_done_state', HumanInterfaceConfirmation, human_server_reset_handler)
     ]
-    state_server = StateServer(sub_handlers)
+    state_server = StateServer(human_interface_handlers + robot_server_handlers + sub_handlers)

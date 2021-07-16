@@ -56,7 +56,7 @@ add_message_files(
   Button.msg
   HumanInterfaceRequest.msg
   HumanInterfaceReply.msg
-  HumanInterfaceConfirmation.msg
+  Confirmation.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -65,6 +65,7 @@ add_service_files(
   DoesActionExist.srv
   GetCurrentState.srv
   RunSkill.srv
+  GetSkillTraj.srv
   RegisterAction.srv
   RunQuery.srv
   GetActionInfo.srv

@@ -1,5 +1,5 @@
 string name
 string text
-int64 min
-int64 max
-int64 value
+float64 min
+float64 max
+float64 value

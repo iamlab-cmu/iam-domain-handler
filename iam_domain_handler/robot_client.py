@@ -1,22 +1,31 @@
 from threading import Thread
 import rospy
 
-from domain_handler_msgs.srv import RunSkill
-
+from domain_handler_msgs.srv import RunSkill, GetSkillTraj
+from domain_handler_msgs.msg import Confirmation
 from .action_registry_client import ActionRegistryClient
-
 
 class RobotClient:
 
     def __init__(self):
         self._run_skill_srv_name = 'run_skill'
+        self._get_skill_traj_srv_name = 'get_skill_traj'
         
         self._action_registry_client = ActionRegistryClient()
 
         self._run_skill_srv_proxy = rospy.ServiceProxy(self._run_skill_srv_name, RunSkill)
+        self._get_skill_traj_srv_proxy = rospy.ServiceProxy(self._get_skill_traj_srv_name, GetSkillTraj)
+
+        self._state_trajectory_done_reset_pub = rospy.Publisher('/state_trajectory_done_reset', Confirmation, queue_size=1000)
 
         self._runnning_skill_id = None
 
+    def get_skill_traj(self, skill_name, skill_param):
+        reset_msg = Confirmation()
+        reset_msg.succeed = False
+        self._state_trajectory_done_reset_pub.publish(reset_msg)
+        return self._get_skill_traj_srv_proxy(skill_name, skill_param)
+    
     def run_skill(self, skill_name, skill_param):
         if self._runnning_skill_id is not None:
             assert self.get_skill_status(self._runnning_skill_id) in ('success', 'failure'), 'A skill is currently running!'

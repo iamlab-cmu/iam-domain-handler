@@ -1,7 +1,7 @@
 import rospy 
 from std_msgs.msg import Int32
 
-from domain_handler_msgs.msg import HumanInterfaceRequest, HumanInterfaceConfirmation
+from domain_handler_msgs.msg import HumanInterfaceRequest, Confirmation
 
 def human_interface_reply_handler(data):
     '''
@@ -40,7 +40,7 @@ def sub_cb(data, handler):
     for k, v in handler(data).items():
         print(k,v)
 
-mock_human_interface_sub = rospy.Subscriber('/mock_human_interface_publisher', HumanInterfaceConfirmation, sub_cb, human_server_reset_handler)
+mock_human_interface_sub = rospy.Subscriber('/mock_human_interface_publisher', Confirmation, sub_cb, human_server_reset_handler)
 
 if __name__ == '__main__':
     rospy.init_node('human_interface_subscriber', anonymous=True)

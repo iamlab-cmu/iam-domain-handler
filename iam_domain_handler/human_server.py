@@ -1,7 +1,7 @@
 import rospy
 
 from domain_handler_msgs.srv import RunQuery
-from domain_handler_msgs.msg import HumanInterfaceRequest, HumanInterfaceConfirmation
+from domain_handler_msgs.msg import HumanInterfaceRequest, Confirmation
 
 from .state_client import StateClient
 from .action_registry_client import ActionRegistryClient
@@ -17,7 +17,7 @@ class HumanServer:
         self._state_client = StateClient()
         self._action_registry_client = ActionRegistryClient()
         self._human_interface_pub = rospy.Publisher('/human_interface_request', HumanInterfaceRequest, queue_size=1000)
-        self._state_server_reset_pub = rospy.Publisher('/reset_query_done_state', HumanInterfaceConfirmation, queue_size=10)
+        self._state_server_reset_pub = rospy.Publisher('/reset_query_done_state', Confirmation, queue_size=10)
         self._run_query_srv = rospy.Service('run_query', RunQuery, self._run_query_srv_handler)
 
         rospy.loginfo('Running Human Interface Server...')
@@ -30,10 +30,10 @@ class HumanServer:
         
         cur_state = self._state_client.get_state()
 
-        reset_msg = HumanInterfaceConfirmation()
+        reset_msg = Confirmation()
         reset_msg.succeed = False
         self._state_server_reset_pub.publish(reset_msg)
-        # self._human_interface_pub.publish(hi_msg)
+        self._human_interface_pub.publish(hi_msg)
 
         query_not_done = False 
         rate = rospy.Rate(10)

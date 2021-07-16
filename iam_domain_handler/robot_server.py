@@ -5,9 +5,11 @@ from frankapy.proto_utils import sensor_proto2ros_msg, make_sensor_group_msg
 from frankapy.proto import PosePositionSensorMessage, JointPositionSensorMessage, ShouldTerminateSensorMessage
 from franka_interface_msgs.msg import SensorDataGroup
 
-from domain_handler_msgs.srv import RunSkill
+from domain_handler_msgs.srv import RunSkill, GetSkillTraj 
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from std_msgs.msg import Header
 
-from iam_skills import CmdType, BaseStreamTrajSkill, BaseGripperSkill
+from iam_skills import CmdType, BaseStreamTrajSkill, BaseGripperSkill, StreamTrajPolicy
 from .state_client import StateClient
 from .action_registry_client import ActionRegistryClient
 from .utils import EE_RigidTransform_from_state, joints_from_state
@@ -29,6 +31,9 @@ class RobotServer:
         self._traj_sensor_pub = rospy.Publisher(FC.DEFAULT_SENSOR_PUBLISHER_TOPIC, SensorDataGroup, queue_size=1000)
 
         self._run_skill_srv = rospy.Service('run_skill', RunSkill, self._run_skill_srv_handler)
+        self._get_skill_traj_srv = rospy.Service('get_skill_traj', GetSkillTraj, self._get_skill_traj_srv_handler)
+
+        self._set_state_trajectory_pub = rospy.Publisher('/set_state_trajectory', JointTrajectory, queue_size=1000)
 
         rospy.loginfo('Running Robot Server...')
         rospy.spin()
@@ -113,6 +118,25 @@ class RobotServer:
 
             return t_step
 
+    
+    def _get_skill_traj_srv_handler(self, req):
+        skill = self._skills_dict[req.skill_name]
+        assert isinstance(skill, BaseStreamTrajSkill)
+
+        init_state = self._state_client.get_state()
+        policy = skill.make_policy(init_state, req.skill_param)
+        assert isinstance(policy, StreamTrajPolicy)
+        pts = []
+        for traj in policy._traj:
+            pt = JointTrajectoryPoint()
+            pt.positions = traj
+            pts.append(pt)
+        pts_msg = JointTrajectory()
+        pts_msg.points = pts
+
+        self._set_state_trajectory_pub.publish(pts_msg)
+        return 'running'
+    
     def _run_skill_srv_handler(self, req):
         skill_info = self._action_registry_client.get_action_info(req.skill_id)
         self._action_registry_client.set_action_status(req.skill_id, 'running')
