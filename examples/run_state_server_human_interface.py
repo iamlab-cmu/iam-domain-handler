@@ -4,6 +4,7 @@ import quaternion as qt
 from franka_interface_msgs.msg import RobotState
 from geometry_msgs.msg import Pose
 from trajectory_msgs.msg import JointTrajectory
+from domain_handler_msgs.msg import GetTrajectory
 
 from web_interface_msgs.msg import Reply, Confirmation
 from iam_domain_handler.state_server import StateServer
@@ -37,18 +38,18 @@ def human_interface_reply_handler(data):
     '''
     # Buttons
     buttons = data.buttons
-    button_values = None
+    buttons_value = []
     for button_idx, button in enumerate(buttons):
-        button_values.append(button.value)
+        buttons_value.append(button.value)
     # Sliders
-    slider_values = []
+    sliders_value = []
     for slider in data.sliders:
-        slider_values += slider.value
+        sliders_value += slider.value
 
     # Bounding boxes
-    bbox_values = []
+    bboxes_value = []
     for bbox_idx, bbox in enumerate(data.bboxes):
-        bbox_values += bbox.value
+        bboxes_value += bbox.value
     
     # text_inputs = data.text_inputs
     # for text_input in text_inputs:
@@ -56,13 +57,14 @@ def human_interface_reply_handler(data):
     # return_dict['text_inputs_value'] = [text_input.value]
     
     return {
-        'button_values' : button_values,
-        'slider_values' : slider_values,
-        'bbox_values' : bbox_values,
+        'buttons_value' : buttons_value,
+        'sliders_value' : sliders_value,
+        'bboxes_value' : bboxes_value,
     }
 
 
 def human_interface_confirmation_handler(data):
+    print("human_interface_confirmation_handler")
     return {
         'query_done' : data.succeed,
     }
@@ -73,13 +75,15 @@ def human_server_reset_handler(data):
     }
 
 def skill_trajectory_done_reset_handler(data):
+    print("skill_trajectory_done_reset_handler")
     return {
         'skill_trajectory_done' : False,
     }
 
 def skill_trajectory_handler(data):
+    print("skill_trajectory_handler")
     pts = []
-    for pt in data.points:
+    for pt in data.trajectory.points:
         pts += list(pt.positions)
     return {
         'skill_trajectory' : pts,
@@ -93,11 +97,11 @@ if __name__ == '__main__':
         ('/reset_query_done_state', Confirmation, human_server_reset_handler),
     ]
     
-    # robot_server_handlers = [
-    #     ('/set_state_trajectory', JointTrajectory, skill_trajectory_handler),
-    #     ('/state_trajectory_done_reset', Confirmation, skill_trajectory_done_reset_handler),
-    # ]
-    robot_server_handlers = []
+    robot_server_handlers = [
+        ('/set_state_trajectory', GetTrajectory, skill_trajectory_handler),
+        ('/state_trajectory_done_reset', Confirmation, skill_trajectory_done_reset_handler),
+    ]
+    # robot_server_handlers = []
     
     sub_handlers = [
         ('/robot_state_publisher_node_1/robot_state', RobotState, robot_state_handler),

@@ -1,5 +1,6 @@
 import json
 from web_interface_msgs.msg import Request, Button, Slider, TextInput, Bbox
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint 
 
 def from_dict_button_to_msg_button(button):
     b = Button()
@@ -28,7 +29,26 @@ def from_dict_bbox_to_msg_bbox(bbox):
     return bb
 
 def from_trajs_to_msg_trajs(trajs):
-    return []
+    """Compile the query parameter into JointTrajectory type to send to human interface
+    for display.
+
+    Args:
+        trajs: List floats with N x 7 items, where N is the length of the trajectory
+
+    Returns:
+        JointTrajectory object
+    """
+    N = int(len(trajs) / 7)
+    pts = []
+    for i in range(N):
+        pt = JointTrajectoryPoint()
+        start, end = 7*i, 7*(i+1)
+        pt.positions = trajs[start:end]
+        pts.append(pt)
+
+    pts_msg = JointTrajectory()
+    pts_msg.points = pts
+    return pts_msg
 
 def params_to_human_interface_request_msg(params):
     params = json.loads(params)
@@ -55,5 +75,4 @@ def params_to_human_interface_request_msg(params):
         hi_msg.robot = params['robot']
     if 'robot_joint_topic' in params:
         hi_msg.robot_joint_topic = params['robot_joint_topic']
-    
     return hi_msg

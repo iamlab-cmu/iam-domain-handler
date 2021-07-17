@@ -12,7 +12,7 @@ from std_msgs.msg import Int32
 class HumanServer:
 
     def __init__(self):
-        rospy.init_node('human_server', anonymous=True)
+        rospy.init_node('human_server')
         
         self._state_client = StateClient()
         self._action_registry_client = ActionRegistryClient()
@@ -34,15 +34,15 @@ class HumanServer:
         reset_msg.succeed = False
         self._state_server_reset_pub.publish(reset_msg)
         self._human_interface_pub.publish(hi_msg)
+        rospy.loginfo('Published query message to human interface...')
 
         query_not_done = False 
         rate = rospy.Rate(10)
         while not query_not_done:
             cur_state = self._state_client.get_state()
             if cur_state.has_prop('query_done'):
-                rospy.loginfo('SUCCESS 0...')
                 query_not_done = cur_state['query_done'][0] > 0
             rate.sleep()
-        rospy.loginfo('SUCCESS...')
+        rospy.loginfo('Successfully querying human interface and got query_done...')
         self._action_registry_client.set_action_status(req.query_id, 'success')
         return 'success'

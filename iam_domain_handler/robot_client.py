@@ -8,6 +8,7 @@ from .action_registry_client import ActionRegistryClient
 class RobotClient:
 
     def __init__(self):
+        rospy.init_node('robot_client')
         self._run_skill_srv_name = 'run_skill'
         self._get_skill_traj_srv_name = 'get_skill_traj'
         
@@ -24,7 +25,8 @@ class RobotClient:
         reset_msg = Confirmation()
         reset_msg.succeed = False
         self._state_trajectory_done_reset_pub.publish(reset_msg)
-        return self._get_skill_traj_srv_proxy(skill_name, skill_param)
+        srv_response = self._get_skill_traj_srv_proxy(skill_name, skill_param)
+        return srv_response.skill_status
     
     def run_skill(self, skill_name, skill_param):
         if self._runnning_skill_id is not None:
