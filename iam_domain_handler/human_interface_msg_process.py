@@ -38,6 +38,19 @@ def from_trajs_to_msg_trajs(trajs):
     Returns:
         JointTrajectory object
     """
+    joint_names = [ 
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7",
+        "panda_joint8",
+        "panda_hand_joint",
+        "panda_finger_joint1",
+        "panda_finger_joint2"
+    ]
     N = int(len(trajs) / 7)
     pts = []
     for i in range(N):
@@ -48,6 +61,7 @@ def from_trajs_to_msg_trajs(trajs):
 
     pts_msg = JointTrajectory()
     pts_msg.points = pts
+    pts_msg.joint_names = joint_names
     return pts_msg
 
 def params_to_human_interface_request_msg(params):
