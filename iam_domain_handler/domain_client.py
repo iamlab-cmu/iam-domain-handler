@@ -2,6 +2,7 @@ from iam_domain_handler.human_client import HumanClient
 from .state_client import StateClient
 from .robot_client import RobotClient
 from .human_client import HumanClient
+from .memory_client import MemoryClient
 
 class DomainClient:
 
@@ -9,6 +10,7 @@ class DomainClient:
         self._state_client = StateClient()
         self._robot_client = RobotClient()
         self._human_client = HumanClient()
+        self._memory_client = MemoryClient()
 
     @property
     def state(self):

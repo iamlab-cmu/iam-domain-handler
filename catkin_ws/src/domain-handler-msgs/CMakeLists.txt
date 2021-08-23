@@ -58,6 +58,11 @@ add_service_files(
   FILES
   DoesActionExist.srv
   GetCurrentState.srv
+  GetMemoryObjects.srv
+  SetMemoryObjects.srv
+  ClearMemory.srv
+  LoadMemory.srv
+  SaveMemory.srv
   RunSkill.srv
   GetSkillTraj.srv
   RegisterAction.srv
