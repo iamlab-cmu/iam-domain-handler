@@ -7,7 +7,7 @@ from iam_domain_handler.domain_client import DomainClient
 
 
 if __name__ == '__main__':
-    rospy.init_node('run_domain_client')
+    #rospy.init_node('run_domain_client')
     domain = DomainClient()
 
     state = domain.state
@@ -16,11 +16,21 @@ if __name__ == '__main__':
     query_params = {
         'buttons' : [
             {
-                'name' : 'grasp_button',
+                'name' : 'submit',
                 'text' : 'Execute Grasp Skill',
             },
             {
                 'name' : 'move_ee_to_pose_button',
+                'text' : 'Execute Move EE to Pose Skill',
+            },
+        ],
+        'text_inputs' : [
+            {
+                'name' : 'Time',
+                'text' : 'Execute Grasp Skill',
+            },
+            {
+                'name' : 'yolo',
                 'text' : 'Execute Move EE to Pose Skill',
             },
         ]
