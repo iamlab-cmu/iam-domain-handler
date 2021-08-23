@@ -19,11 +19,13 @@ class MemoryServer:
         self._get_memory_objects_srv_name = 'get_memory_objects'
         self._set_memory_objects_srv_name = 'set_memory_objects'
         self._load_memory_srv_name = 'load_memory'
+        self._clear_all_memory_srv_name = 'clear_all_memory'
         self._clear_memory_srv_name = 'clear_memory'
         self._save_memory_srv_name = 'save_memory'
         self._get_memory_objects_srv = rospy.Service(self._get_memory_objects_srv_name, GetMemoryObjects, self._get_memory_objects_handler)
         self._set_memory_objects_srv = rospy.Service(self._set_memory_objects_srv_name, SetMemoryObjects, self._set_memory_objects_handler)
         self._load_memory_srv = rospy.Service(self._load_memory_srv_name, LoadMemory, self._load_memory_handler)
+        self._clear_all_memory_srv = rospy.Service(self._clear_all_memory_srv_name, ClearAllMemory, self._clear_all_memory_handler)
         self._clear_memory_srv = rospy.Service(self._clear_memory_srv_name, ClearMemory, self._clear_memory_handler)
         self._save_memory_srv = rospy.Service(self._save_memory_srv_name, SaveMemory, self._save_memory_handler)
         
@@ -46,8 +48,14 @@ class MemoryServer:
             rospy.loginfo('Failed to save memory file:' + req.filename)
             return SaveMemoryResponse(False)
 
-    def _clear_memory_handler(self, req):
+    def _clear_all_memory_handler(self, req):
         self.memory = {}
+        return ClearAllMemoryResponse(True)
+
+    def _clear_memory_handler(self, req):
+        for key in req.keys:
+            self.memory.pop(key, None)
+
         return ClearMemoryResponse(True)
 
     def _get_memory_objects_handler(self, req):

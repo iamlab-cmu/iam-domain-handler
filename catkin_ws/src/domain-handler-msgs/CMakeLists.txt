@@ -60,6 +60,7 @@ add_service_files(
   GetCurrentState.srv
   GetMemoryObjects.srv
   SetMemoryObjects.srv
+  ClearAllMemory.srv
   ClearMemory.srv
   LoadMemory.srv
   SaveMemory.srv
