@@ -17,12 +17,12 @@ from iam_skills import *
 from .state_client import StateClient
 from .memory_client import MemoryClient
 from .action_registry_client import ActionRegistryClient
-from .utils import EE_RigidTransform_from_state, joints_from_state, create_formated_skill_dict
+from .utils import EE_RigidTransform_from_state, joints_from_state, create_skill_dict
 
 class RobotServer:
 
     def __init__(self, skills_dict):
-        rospy.init_node('robot_server')
+        #rospy.init_node('robot_server')
         self._skills_dict = skills_dict
 
         # Only support gripper skill or skills that stream ee or joint trajs for now
@@ -63,7 +63,7 @@ class RobotServer:
 
             rate = rospy.Rate(1 / policy.dt)
             t_step = 0
-            fa.run_guide_mode(duration=policy.duration, block=False)
+            self._fa.run_guide_mode(duration=policy.duration, block=False)
 
             while True:
                 state = self._state_client.get_state()
@@ -71,6 +71,7 @@ class RobotServer:
 
                 if skill.termination_condition_satisfied(state, param, policy, t_step) > 0.5 \
                 or self._action_registry_client.get_action_status(skill_id) == 'cancelled':
+                    self._fa.stop_skill()
                     break
 
                 if policy.record:
@@ -82,7 +83,7 @@ class RobotServer:
                 rate.sleep()
 
             if policy.record:
-                skill_dict = create_formated_skill_dict(joints, end_effector_position, time_since_skill_started)
+                skill_dict = create_skill_dict(joints, end_effector_position, time_since_skill_started)
                 self._memory_client.set_memory_objects({'recorded_trajectory' : skill_dict})
             
             return 1

@@ -5,7 +5,7 @@ import time
 from iam_domain_handler.domain_client import DomainClient
 
 if __name__ == '__main__':
-    rospy.init_node('run_domain_client')
+    #rospy.init_node('run_domain_client')
     domain = DomainClient()
 
     while not rospy.is_shutdown():
@@ -150,7 +150,7 @@ if __name__ == '__main__':
                                         'text' : '',
                                     },
                                 ],
-                                'traj1' : recorded_trajectory['skill_state_dict']['q']
+                                'traj1' : list(recorded_trajectory['skill_state_dict']['q'].flatten())
                             }
 
                             query_id = domain.run_query('Teaching 5', json.dumps(query_params))
