@@ -26,6 +26,12 @@ class DomainClient:
  
     def get_skill_status(self, skill_id):
         return self._robot_client.get_skill_status(skill_id)
+
+    def stop_skill(self, skill_id):
+        return self._robot_client.stop_skill(skill_id)
+
+    def cancel_skill(self, skill_id):
+        return self._robot_client.cancel_skill(skill_id)
     
     def run_query(self, query_name, query_param):
         return self._human_client.run_query(query_name, query_param)

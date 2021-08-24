@@ -13,21 +13,11 @@ from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from domain_handler_msgs.msg import GetTrajectory
 from std_msgs.msg import Header
 
-from iam_skills import CmdType, BaseStreamTrajSkill, BaseGripperSkill, StreamTrajPolicy
+from iam_skills import *
 from .state_client import StateClient
 from .memory_client import MemoryClient
 from .action_registry_client import ActionRegistryClient
-from .utils import EE_RigidTransform_from_state, joints_from_state
-
-def create_formated_skill_dict(joints, end_effector_positions, time_since_skill_started):
-    skill_dict = dict(skill_description='GuideMode', skill_state_dict=dict())
-    skill_dict['skill_state_dict']['q'] = np.array(joints)
-    skill_dict['skill_state_dict']['O_T_EE'] = np.array(end_effector_positions)
-    skill_dict['skill_state_dict']['time_since_skill_started'] = np.array(time_since_skill_started)
-
-    # The key (0 here) usually represents the absolute time when the skill was started but
-    formatted_dict = {0: skill_dict}
-    return formatted_dict
+from .utils import EE_RigidTransform_from_state, joints_from_state, create_formated_skill_dict
 
 class RobotServer:
 
@@ -37,9 +27,9 @@ class RobotServer:
 
         # Only support gripper skill or skills that stream ee or joint trajs for now
         for skill in self._skills_dict.values():
-            assert isinstance(skill, BaseStreamTrajSkill) or isinstance(skill, BaseGripperSkill)
+            assert isinstance(skill, BaseStreamTrajSkill) or isinstance(skill, BaseGripperSkill) or isinstance(skill, BaseForceSkill)
         
-        # self._fa = FrankaArm(old_gripper=True)
+        self._fa = FrankaArm()
         self._state_client = StateClient()
         self._memory_client = MemoryClient()
         self._action_registry_client = ActionRegistryClient()
@@ -54,7 +44,7 @@ class RobotServer:
         rospy.loginfo('Running Robot Server...')
         rospy.spin()
 
-    def _run_policy_on_robot(self, init_state, policy, param, skill):
+    def _run_policy_on_robot(self, skill_id, init_state, policy, param, skill):
         if policy.cmd_type == CmdType.GRIPPER:
             gripper_cmd = policy(init_state)
             if gripper_cmd['target_width'] is not None:
@@ -70,20 +60,31 @@ class RobotServer:
             joints = []
             start_time = time.time()
             last_time = None
-            force_cmd = policy(init_state)
-            fa.run_guide_mode(duration=force_cmd['duration'], block=force_cmd['block'])
-            if force_cmd['record']:
-                while last_time is None or (last_time - start_time) < args.time:
-                    pose_array = convert_rigid_transform_to_array(fa.get_pose())
-                    end_effector_position.append(pose_array)
-                    joints.append(fa.get_joints())
-                    time_since_skill_started.append(time.time() - start_time)
-                    # add sleep to record at 100Hz
-                    time.sleep(0.0099)
-                    last_time = time.time()
 
+            rate = rospy.Rate(1 / policy.dt)
+            t_step = 0
+            fa.run_guide_mode(duration=policy.duration, block=False)
+
+            while True:
+                state = self._state_client.get_state()
+                t_step += 1
+
+                if skill.termination_condition_satisfied(state, param, policy, t_step) > 0.5 \
+                or self._action_registry_client.get_action_status(skill_id) == 'cancelled':
+                    break
+
+                if policy.record:
+                    pose_array = convert_rigid_transform_to_array(EE_RigidTransform_from_state(state))
+                    end_effector_position.append(pose_array)
+                    joints.append(joints_from_state(state))
+                    time_since_skill_started.append(time.time() - start_time)
+
+                rate.sleep()
+
+            if policy.record:
                 skill_dict = create_formated_skill_dict(joints, end_effector_position, time_since_skill_started)
                 self._memory_client.set_memory_objects({recorded_trajectory: skill_dict})
+            
             return 1
         else:
             if policy.cmd_type == CmdType.EE:
@@ -109,7 +110,8 @@ class RobotServer:
             while True:
                 state = self._state_client.get_state()
                 t_step += 1
-                if skill.termination_condition_satisfied(state, param, policy, t_step) > 0.5:
+                if skill.termination_condition_satisfied(state, param, policy, t_step) > 0.5 \
+                or self._action_registry_client.get_action_status(skill_id) == 'cancelled':
                     break
 
                 traj_item = policy(state)
@@ -195,7 +197,7 @@ class RobotServer:
         init_state = self._state_client.get_state()
         policy = skill.make_policy(init_state, skill_info.action_param)
 
-        t_step = self._run_policy_on_robot(init_state, policy, skill_info.action_param, skill)
+        t_step = self._run_policy_on_robot(req.skill_id, init_state, policy, skill_info.action_param, skill)
 
         end_state = self._state_client.get_state()
 

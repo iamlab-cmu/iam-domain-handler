@@ -46,7 +46,10 @@ if __name__ == '__main__':
             button_inputs = domain.get_memory_objects(['buttons'])['buttons']
             if button_inputs['Start'] == 1:
                 domain.clear_human_inputs()
-                domain.run_skill()
+                skill_params = {
+                    'duration' : 10
+                }
+                domain.run_skill('zero_force', json.dumps(skill_params))
 
                 query_params = {
                     'instruction_text' : 'Move the Robot to the Starting Position and Press Done when Completed.',

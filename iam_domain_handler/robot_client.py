@@ -41,5 +41,11 @@ class RobotClient:
 
         return self._running_skill_id
 
+    def stop_skill(self, skill_id):
+        return self._action_registry_client.set_action_status(skill_id, 'stopped')
+
+    def cancel_skill(self, skill_id):
+        return self._action_registry_client.set_action_status(skill_id, 'cancelled')
+
     def get_skill_status(self, skill_id):
         return self._action_registry_client.get_action_status(skill_id)
