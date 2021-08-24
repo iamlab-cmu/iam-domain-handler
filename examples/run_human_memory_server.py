@@ -36,14 +36,8 @@ def human_interface_reply_handler(data):
         'buttons' : buttons,
         'sliders' : sliders,
         'text_inputs' : text_inputs,
-        'bboxes' : bboxes
-    }
-
-
-def human_interface_confirmation_handler(data):
-    print("human_interface_confirmation_handler")
-    return {
-        'query_done' : data.succeed,
+        'bboxes' : bboxes,
+        'query_done' : True,
     }
 
 def human_server_reset_handler(data):
@@ -70,7 +64,6 @@ def skill_trajectory_handler(data):
 if __name__ == '__main__':
     human_interface_handlers = [
         ('/human_interface_reply', Reply, human_interface_reply_handler),
-        ('/human_interface_confirmation', Confirmation, human_interface_confirmation_handler),
         ('/reset_query_done_state', Confirmation, human_server_reset_handler),
     ]
     

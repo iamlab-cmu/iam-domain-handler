@@ -4,6 +4,7 @@ from domain_handler_msgs.srv import RunQuery
 from web_interface_msgs.msg import Request, Confirmation
 
 from .state_client import StateClient
+from .memory_client import MemoryClient
 from .action_registry_client import ActionRegistryClient
 from .human_interface_msg_process import params_to_human_interface_request_msg
 from std_msgs.msg import Int32
@@ -15,6 +16,7 @@ class HumanServer:
         rospy.init_node('human_server')
         
         self._state_client = StateClient()
+        self._memory_client = MemoryClient()
         self._action_registry_client = ActionRegistryClient()
         self._human_interface_pub = rospy.Publisher('/human_interface_request', Request, queue_size=1000)
         self._state_server_reset_pub = rospy.Publisher('/reset_query_done_state', Confirmation, queue_size=10)
@@ -28,8 +30,6 @@ class HumanServer:
         self._action_registry_client.set_action_status(req.query_id, 'running')
         hi_msg = params_to_human_interface_request_msg(query_info.action_param)
         
-        cur_state = self._state_client.get_state()
-
         reset_msg = Confirmation()
         reset_msg.succeed = False
         self._state_server_reset_pub.publish(reset_msg)
@@ -39,9 +39,9 @@ class HumanServer:
         query_not_done = False 
         rate = rospy.Rate(10)
         while not query_not_done:
-            cur_state = self._state_client.get_state()
-            if cur_state.has_prop('query_done'):
-                query_not_done = cur_state['query_done'][0] > 0
+            query_done_dict = self._memory_client.get_memory_objects(['query_done'])
+            if query_done_dict is not None and query_done_dict['query_done'] is not None:
+                query_not_done = query_done_dict['query_done'] > 0
             rate.sleep()
         rospy.loginfo('Successfully querying human interface and got query_done...')
         self._action_registry_client.set_action_status(req.query_id, 'success')

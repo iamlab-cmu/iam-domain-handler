@@ -43,7 +43,7 @@ class MemoryClient:
 
     def get_memory_objects(self, keys):
         try:
-            return pickle.loads(self._get_memory_objects_srv_proxy(keys).objects)
+            return pickle.loads(self._get_memory_objects_srv_proxy(pickle.dumps(keys)).objects)
         except:
             return None
 

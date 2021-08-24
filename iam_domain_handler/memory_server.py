@@ -53,7 +53,8 @@ class MemoryServer:
         return ClearAllMemoryResponse(True)
 
     def _clear_memory_handler(self, req):
-        for key in req.keys:
+        keys = pickle.loads(req.keys)
+        for key in keys:
             self.memory.pop(key, None)
 
         return ClearMemoryResponse(True)
@@ -61,7 +62,8 @@ class MemoryServer:
     def _get_memory_objects_handler(self, req):
         response_dict = {}
 
-        for key in req.keys:
+        keys = pickle.loads(req.keys)
+        for key in keys:
             try:
                 response_dict[key] = self.memory[key]
             except:

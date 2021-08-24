@@ -1,3 +1,3 @@
-string[] keys
+uint8[] keys
 ---
-string objects
+uint8[] objects

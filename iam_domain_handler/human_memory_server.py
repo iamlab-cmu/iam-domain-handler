@@ -1,5 +1,5 @@
 import rospy
-from memory_client import MemoryClient
+from .memory_client import MemoryClient
 
 class HumanMemoryServer:
 
@@ -16,5 +16,4 @@ class HumanMemoryServer:
         rospy.spin()
 
     def _sub_cb(self, data, handler):
-        for k, v in handler(data).items():
-            self.memory_client.set_memory_objects(k, v)
+        self._memory_client.set_memory_objects(handler(data))
