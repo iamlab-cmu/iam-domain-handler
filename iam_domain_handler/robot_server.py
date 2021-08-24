@@ -83,7 +83,7 @@ class RobotServer:
 
             if policy.record:
                 skill_dict = create_formated_skill_dict(joints, end_effector_position, time_since_skill_started)
-                self._memory_client.set_memory_objects({recorded_trajectory: skill_dict})
+                self._memory_client.set_memory_objects({'recorded_trajectory' : skill_dict})
             
             return 1
         else:
