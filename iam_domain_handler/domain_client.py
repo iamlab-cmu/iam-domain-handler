@@ -1,3 +1,5 @@
+import time
+
 from iam_domain_handler.human_client import HumanClient
 from .state_client import StateClient
 from .robot_client import RobotClient
@@ -28,5 +30,28 @@ class DomainClient:
     def run_query(self, query_name, query_param):
         return self._human_client.run_query(query_name, query_param)
     
+    def wait_until_skill_done(self, skill_id):
+        skill_status = self.get_skill_status(skill_id)
+
+        while skill_status != 'success':
+            skill_status = self.get_skill_status(skill_id)
+            time.sleep(0.5)
+
+    def wait_until_query_done(self, query_id):
+        query_status = self.get_query_status(query_id)
+
+        while query_status != 'success':
+            query_status = self.get_query_status(query_id)
+            time.sleep(0.5)
+
     def get_query_status(self, query_id):
         return self._human_client.get_query_status(query_id)
+
+    def get_memory_objects(self, keys):
+        return self._memory_client.get_memory_objects(keys)
+
+    def clear_memory(self, keys):
+        return self._memory_client.clear_memory(keys)
+
+    def clear_human_inputs(self):
+        return self._memory_client.clear_memory(['buttons', 'sliders', 'text_inputs', 'bboxes', 'query_done'])
