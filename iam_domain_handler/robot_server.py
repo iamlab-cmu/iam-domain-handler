@@ -27,7 +27,8 @@ class RobotServer:
 
         # Only support gripper skill or skills that stream ee or joint trajs for now
         for skill in self._skills_dict.values():
-            assert isinstance(skill, BaseStreamTrajSkill) or isinstance(skill, BaseGripperSkill) or isinstance(skill, BaseForceSkill)
+            assert isinstance(skill, BaseStreamTrajSkill) or isinstance(skill, BaseGripperSkill) \
+            or isinstance(skill, BaseForceSkill) or isinstance(skill, BaseOneStepJointSkill)
         
         self._fa = FrankaArm()
         self._state_client = StateClient()
@@ -86,6 +87,24 @@ class RobotServer:
                 skill_dict = create_skill_dict(joints, end_effector_position, time_since_skill_started)
                 self._memory_client.set_memory_objects({'recorded_trajectory' : skill_dict})
             
+            return 1
+        elif policy.cmd_type == CmdType.ONESTEPJOINT:
+
+            rate = rospy.Rate(1 / policy.dt)
+            t_step = 0
+            self._fa.goto_joints(joints=policy.goal_joints, duration=policy.duration, block=False)
+
+            while True:
+                state = self._state_client.get_state()
+                t_step += 1
+
+                if skill.termination_condition_satisfied(state, param, policy, t_step) > 0.5 \
+                or self._action_registry_client.get_action_status(skill_id) == 'cancelled':
+                    self._fa.stop_skill()
+                    break
+
+                rate.sleep()
+
             return 1
         else:
             if policy.cmd_type == CmdType.EE:

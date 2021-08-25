@@ -32,3 +32,6 @@ class HumanClient:
 
     def get_query_status(self, query_id):
         return self._action_registry_client.get_action_status(query_id)
+
+    def cancel_query(self, query_id):
+        return self._action_registry_client.set_action_status(query_id, 'success')
