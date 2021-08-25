@@ -278,7 +278,7 @@ if __name__ == '__main__':
                                 domain.clear_human_inputs()
 
                                 skill_params = {
-                                    'dt' : 0.01,
+                                    'dt' : 0.02,
                                     'traj' : saved_skill_params['skill_state_dict']['q'].tolist()
                                 }
                                 skill_id = domain.run_skill('stream_joint_traj', json.dumps(skill_params))
