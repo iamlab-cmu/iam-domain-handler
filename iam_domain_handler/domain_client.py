@@ -37,7 +37,7 @@ class DomainClient:
         return self._human_client.run_query(query_name, query_param)
 
     def cancel_query(self, query_id):
-        return self._human_client.cancel_skill(query_id)
+        return self._human_client.cancel_query(query_id)
     
     def wait_until_skill_done(self, skill_id):
         skill_status = self.get_skill_status(skill_id)
