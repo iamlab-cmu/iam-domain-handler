@@ -140,6 +140,7 @@ if __name__ == '__main__':
                             query_params = {
                                 'instruction_text' : 'Press Ok if the recorded trajectory looks good.',
                                 'display_type' : 2,
+                                'camera_topic' : '/camera/rgb/image_raw',
                                 'buttons' : [
                                     {
                                         'name' : 'Ok',
