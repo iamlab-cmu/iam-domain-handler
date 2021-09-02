@@ -36,6 +36,41 @@ class DomainClient:
     def run_query(self, query_name, query_param):
         return self._human_client.run_query(query_name, query_param)
 
+    def run_query_until_done(self, query_name, query_param, timeout=30):
+
+        response = {}
+        has_buttons = 'buttons' in query_param.keys()
+        has_text_inputs = 'text_inputs' in query_param.keys()
+
+        query_id = self.run_query(query_name, json.dumps(query_param))
+        query_result = self.wait_until_query_done(query_id, timeout)
+
+        query_complete = False
+
+        while not query_complete:
+            while not query_result:
+                self.cancel_query(query_id)
+                query_id = self.run_query(query_name, json.dumps(query_param))
+                query_result = self.wait_until_query_done(query_id, timeout)
+
+            if has_buttons:
+                button_inputs = self.get_memory_objects(['buttons'])['buttons']
+                if len(button_inputs.keys()) != len(query_param['buttons']):
+                    query_result = False
+                    continue
+                else:
+                    response['button_inputs'] = button_inputs
+            if has_text_inputs:
+                text_inputs = self.get_memory_objects(['text_inputs'])['text_inputs']
+                if len(button_inputs.keys()) != len(query_param['text_inputs']):
+                    query_result = False
+                    continue
+                else:
+                    response['text_inputs'] = text_inputs
+            query_complete = True
+
+        return response
+
     def cancel_query(self, query_id):
         return self._human_client.cancel_query(query_id)
     

@@ -9,6 +9,10 @@ if __name__ == '__main__':
     domain = DomainClient()
 
     while not rospy.is_shutdown():
+
+        button_inputs = []
+        text_inputs = []
+
         query_params = {
             'buttons' : [
                 {
@@ -21,15 +25,10 @@ if __name__ == '__main__':
                 },
             ]
         }
-        query_id = domain.run_query('Initial Options', json.dumps(query_params))
-        query_result = domain.wait_until_query_done(query_id)
 
-        while not query_result:
-            domain.cancel_query(query_id)
-            query_id = domain.run_query('Initial Options', json.dumps(query_params))
-            query_result = domain.wait_until_query_done(query_id)
+        query_response = domain.run_query_until_done('Starting Menu', json.dumps(query_params))
+        button_inputs = query_response['button_inputs']
 
-        button_inputs = domain.get_memory_objects(['buttons'])['buttons']
         if button_inputs['Teach Skill'] == 1:
             domain.clear_human_inputs()
             query_params = {
@@ -45,15 +44,10 @@ if __name__ == '__main__':
                     },
                 ]
             }
-            query_id = domain.run_query('Teaching 1', json.dumps(query_params))
-            query_result = domain.wait_until_query_done(query_id)
 
-            while not query_result:
-                domain.cancel_query(query_id)
-                query_id = domain.run_query('Teaching 1', json.dumps(query_params))
-                query_result = domain.wait_until_query_done(query_id)
+            query_response = domain.run_query_until_done('Teaching 1', json.dumps(query_params))
+            button_inputs = query_response['button_inputs']
 
-            button_inputs = domain.get_memory_objects(['buttons'])['buttons']
             if button_inputs['Start'] == 1:
                 domain.clear_human_inputs()
                 skill_params = {
@@ -75,15 +69,10 @@ if __name__ == '__main__':
                         },
                     ]
                 }
-                query_id = domain.run_query('Teaching 2', json.dumps(query_params))
-                query_result = domain.wait_until_query_done(query_id)
 
-                while not query_result:
-                    domain.cancel_query(query_id)
-                    query_id = domain.run_query('Teaching 2', json.dumps(query_params))
-                    query_result = domain.wait_until_query_done(query_id)
-
-                button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+                query_response = domain.run_query_until_done('Teaching 2', json.dumps(query_params))
+                button_inputs = query_response['button_inputs']
+                    
                 if button_inputs['Done'] == 1:
                     domain.clear_human_inputs()
                     if domain.get_skill_status(skill_id) == 'running':
@@ -114,16 +103,11 @@ if __name__ == '__main__':
                             },
                         ]
                     }
-                    query_id = domain.run_query('Teaching 3', json.dumps(query_params))
-                    query_result = domain.wait_until_query_done(query_id)
 
-                    while not query_result:
-                        domain.cancel_query(query_id)
-                        query_id = domain.run_query('Teaching 3', json.dumps(query_params))
-                        query_result = domain.wait_until_query_done(query_id)
+                    query_response = domain.run_query_until_done('Teaching 3', json.dumps(query_params))
+                    button_inputs = query_response['button_inputs']
+                    text_inputs = query_response['text_inputs']
 
-                    button_inputs = domain.get_memory_objects(['buttons'])['buttons']
-                    text_inputs = domain.get_memory_objects(['text_inputs'])['text_inputs']
                     if button_inputs['Start'] == 1:
                         skill_name = text_inputs['skill_name']
                         skill_duration = float(text_inputs['skill_duration'])
@@ -149,15 +133,9 @@ if __name__ == '__main__':
                             ]
                         }
 
-                        query_id = domain.run_query('Teaching 4', json.dumps(query_params))
-                        query_result = domain.wait_until_query_done(query_id)
-
-                        while not query_result:
-                            domain.cancel_query(query_id)
-                            query_id = domain.run_query('Teaching 4', json.dumps(query_params))
-                            query_result = domain.wait_until_query_done(query_id)
-
-                        button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+                        query_response = domain.run_query_until_done('Teaching 4', json.dumps(query_params))
+                        button_inputs = query_response['button_inputs']
+            
                         if button_inputs['Done'] == 1:
                             recorded_trajectory = domain.get_memory_objects(['recorded_trajectory'])['recorded_trajectory']
                             domain.clear_human_inputs()
@@ -187,7 +165,9 @@ if __name__ == '__main__':
                                 query_id = domain.run_query('Teaching 5', json.dumps(query_params))
                                 query_result = domain.wait_until_query_done(query_id)
 
-                            button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+                                button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+                                if len(button_inputs.keys()) != len(query_params['buttons']):
+                                    query_result = False
                             if button_inputs['Ok'] == 1:
                                 domain.clear_human_inputs()
                                 recorded_trajectory['duration'] = skill_duration
@@ -228,16 +208,11 @@ if __name__ == '__main__':
                     },
                 ]
             }
-            query_id = domain.run_query('Execute Skill 1', json.dumps(query_params))
-            query_result = domain.wait_until_query_done(query_id)
 
-            while not query_result:
-                domain.cancel_query(query_id)
-                query_id = domain.run_query('Execute Skill 1', json.dumps(query_params))
-                query_result = domain.wait_until_query_done(query_id)
+            query_response = domain.run_query_until_done('Execute Skill 1', json.dumps(query_params))
+            button_inputs = query_response['button_inputs']
+            text_inputs = query_response['text_inputs']
 
-            button_inputs = domain.get_memory_objects(['buttons'])['buttons']
-            text_inputs = domain.get_memory_objects(['text_inputs'])['text_inputs']
             if button_inputs['Start'] == 1:
                 domain.clear_human_inputs()
                 skill_name = text_inputs['skill_name']
@@ -263,15 +238,9 @@ if __name__ == '__main__':
                             },
                         ]
                     }
-                    query_id = domain.run_query('Execute Skill 2', json.dumps(query_params))
-                    query_result = domain.wait_until_query_done(query_id)
+                    query_response = domain.run_query_until_done('Execute Skill 2', json.dumps(query_params))
+                    button_inputs = query_response['button_inputs']
 
-                    while not query_result:
-                        domain.cancel_query(query_id)
-                        query_id = domain.run_query('Execute Skill 2', json.dumps(query_params))
-                        query_result = domain.wait_until_query_done(query_id)
-
-                    button_inputs = domain.get_memory_objects(['buttons'])['buttons']
                     if button_inputs['Done'] == 1:
                         domain.clear_human_inputs()
                         if domain.get_skill_status(skill_id) == 'running':
@@ -290,15 +259,9 @@ if __name__ == '__main__':
                                 },
                             ],
                         }
-                        query_id = domain.run_query('Execute Skill 3', json.dumps(query_params))
-                        query_result = domain.wait_until_query_done(query_id)
+                        query_response = domain.run_query_until_done('Execute Skill 3', json.dumps(query_params))
+                        button_inputs = query_response['button_inputs']
 
-                        while not query_result:
-                            domain.cancel_query(query_id)
-                            query_id = domain.run_query('Execute Skill 2', json.dumps(query_params))
-                            query_result = domain.wait_until_query_done(query_id)
-
-                        button_inputs = domain.get_memory_objects(['buttons'])['buttons']
                         if button_inputs['Start'] == 1:
                             domain.clear_human_inputs()
 
