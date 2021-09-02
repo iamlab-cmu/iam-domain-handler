@@ -22,7 +22,12 @@ if __name__ == '__main__':
             ]
         }
         query_id = domain.run_query('Initial Options', json.dumps(query_params))
-        domain.wait_until_query_done(query_id)
+        query_result = domain.wait_until_query_done(query_id)
+
+        while not query_result:
+            domain.stop_query(query_id)
+            query_id = domain.run_query('Initial Options', json.dumps(query_params))
+            query_result = domain.wait_until_query_done(query_id)
 
         button_inputs = domain.get_memory_objects(['buttons'])['buttons']
         if button_inputs['Teach Skill'] == 1:
@@ -41,7 +46,12 @@ if __name__ == '__main__':
                 ]
             }
             query_id = domain.run_query('Teaching 1', json.dumps(query_params))
-            domain.wait_until_query_done(query_id)
+            query_result = domain.wait_until_query_done(query_id)
+
+            while not query_result:
+                domain.stop_query(query_id)
+                query_id = domain.run_query('Teaching 1', json.dumps(query_params))
+                query_result = domain.wait_until_query_done(query_id)
 
             button_inputs = domain.get_memory_objects(['buttons'])['buttons']
             if button_inputs['Start'] == 1:
@@ -66,7 +76,12 @@ if __name__ == '__main__':
                     ]
                 }
                 query_id = domain.run_query('Teaching 2', json.dumps(query_params))
-                domain.wait_until_query_done(query_id)
+                query_result = domain.wait_until_query_done(query_id)
+
+                while not query_result:
+                    domain.stop_query(query_id)
+                    query_id = domain.run_query('Teaching 2', json.dumps(query_params))
+                    query_result = domain.wait_until_query_done(query_id)
 
                 button_inputs = domain.get_memory_objects(['buttons'])['buttons']
                 if button_inputs['Done'] == 1:
@@ -100,7 +115,12 @@ if __name__ == '__main__':
                         ]
                     }
                     query_id = domain.run_query('Teaching 3', json.dumps(query_params))
-                    domain.wait_until_query_done(query_id)
+                    query_result = domain.wait_until_query_done(query_id)
+
+                    while not query_result:
+                        domain.stop_query(query_id)
+                        query_id = domain.run_query('Teaching 3', json.dumps(query_params))
+                        query_result = domain.wait_until_query_done(query_id)
 
                     button_inputs = domain.get_memory_objects(['buttons'])['buttons']
                     text_inputs = domain.get_memory_objects(['text_inputs'])['text_inputs']
@@ -130,7 +150,12 @@ if __name__ == '__main__':
                         }
 
                         query_id = domain.run_query('Teaching 4', json.dumps(query_params))
-                        domain.wait_until_query_done(query_id)
+                        query_result = domain.wait_until_query_done(query_id)
+
+                        while not query_result:
+                            domain.stop_query(query_id)
+                            query_id = domain.run_query('Teaching 4', json.dumps(query_params))
+                            query_result = domain.wait_until_query_done(query_id)
 
                         button_inputs = domain.get_memory_objects(['buttons'])['buttons']
                         if button_inputs['Done'] == 1:
@@ -155,7 +180,13 @@ if __name__ == '__main__':
                             }
 
                             query_id = domain.run_query('Teaching 5', json.dumps(query_params))
-                            domain.wait_until_query_done(query_id)
+                            query_result = domain.wait_until_query_done(query_id)
+
+                            while not query_result:
+                                domain.stop_query(query_id)
+                                query_id = domain.run_query('Teaching 5', json.dumps(query_params))
+                                query_result = domain.wait_until_query_done(query_id)
+
                             button_inputs = domain.get_memory_objects(['buttons'])['buttons']
                             if button_inputs['Ok'] == 1:
                                 domain.clear_human_inputs()
@@ -198,7 +229,12 @@ if __name__ == '__main__':
                 ]
             }
             query_id = domain.run_query('Execute Skill 1', json.dumps(query_params))
-            domain.wait_until_query_done(query_id)
+            query_result = domain.wait_until_query_done(query_id)
+
+            while not query_result:
+                domain.stop_query(query_id)
+                query_id = domain.run_query('Execute Skill 1', json.dumps(query_params))
+                query_result = domain.wait_until_query_done(query_id)
 
             button_inputs = domain.get_memory_objects(['buttons'])['buttons']
             text_inputs = domain.get_memory_objects(['text_inputs'])['text_inputs']
@@ -228,7 +264,12 @@ if __name__ == '__main__':
                         ]
                     }
                     query_id = domain.run_query('Execute Skill 2', json.dumps(query_params))
-                    domain.wait_until_query_done(query_id)
+                    query_result = domain.wait_until_query_done(query_id)
+
+                    while not query_result:
+                        domain.stop_query(query_id)
+                        query_id = domain.run_query('Execute Skill 2', json.dumps(query_params))
+                        query_result = domain.wait_until_query_done(query_id)
 
                     button_inputs = domain.get_memory_objects(['buttons'])['buttons']
                     if button_inputs['Done'] == 1:
@@ -250,7 +291,12 @@ if __name__ == '__main__':
                             ],
                         }
                         query_id = domain.run_query('Execute Skill 3', json.dumps(query_params))
-                        domain.wait_until_query_done(query_id)
+                        query_result = domain.wait_until_query_done(query_id)
+
+                        while not query_result:
+                            domain.stop_query(query_id)
+                            query_id = domain.run_query('Execute Skill 2', json.dumps(query_params))
+                            query_result = domain.wait_until_query_done(query_id)
 
                         button_inputs = domain.get_memory_objects(['buttons'])['buttons']
                         if button_inputs['Start'] == 1:
@@ -274,6 +320,7 @@ if __name__ == '__main__':
                             }
                             query_id = domain.run_query('Execute Skill 4', json.dumps(query_params))
                             (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
+
                             if skill_done:
                                 domain.cancel_query(query_id)
                                 domain.clear_human_inputs()
