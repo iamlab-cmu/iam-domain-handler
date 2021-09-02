@@ -39,8 +39,8 @@ class DomainClient:
     def run_query_until_done(self, query_name, query_param, timeout=30):
 
         response = {}
-        has_buttons = 'buttons' in query_param.keys()
-        has_text_inputs = 'text_inputs' in query_param.keys()
+        has_buttons = ('buttons' in query_param.keys())
+        has_text_inputs = ('text_inputs' in query_param.keys())
 
         query_id = self.run_query(query_name, json.dumps(query_param))
         query_result = self.wait_until_query_done(query_id, timeout)
