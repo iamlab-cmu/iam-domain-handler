@@ -56,18 +56,18 @@ class DomainClient:
 
             if has_buttons:
                 button_inputs = self.get_memory_objects(['buttons'])['buttons']
-                if len(button_inputs.keys()) != len(query_param['buttons']):
-                    query_result = False
-                    continue
-                else:
-                    response['button_inputs'] = button_inputs
+                for button in query_param['buttons']:
+                    if button['name'] not in button_inputs.keys():
+                        query_result = False
+                        continue
+                response['button_inputs'] = button_inputs
             if has_text_inputs:
                 text_inputs = self.get_memory_objects(['text_inputs'])['text_inputs']
-                if len(button_inputs.keys()) != len(query_param['text_inputs']):
-                    query_result = False
-                    continue
-                else:
-                    response['text_inputs'] = text_inputs
+                for text_input in query_param['text_inputs']:
+                    if text_input['name'] not in text_inputs.keys():
+                        query_result = False
+                        continue
+                response['text_inputs'] = text_inputs
             query_complete = True
 
         return response
