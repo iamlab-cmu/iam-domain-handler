@@ -25,7 +25,7 @@ if __name__ == '__main__':
         query_result = domain.wait_until_query_done(query_id)
 
         while not query_result:
-            domain.stop_query(query_id)
+            domain.cancel_query(query_id)
             query_id = domain.run_query('Initial Options', json.dumps(query_params))
             query_result = domain.wait_until_query_done(query_id)
 
@@ -49,7 +49,7 @@ if __name__ == '__main__':
             query_result = domain.wait_until_query_done(query_id)
 
             while not query_result:
-                domain.stop_query(query_id)
+                domain.cancel_query(query_id)
                 query_id = domain.run_query('Teaching 1', json.dumps(query_params))
                 query_result = domain.wait_until_query_done(query_id)
 
@@ -79,7 +79,7 @@ if __name__ == '__main__':
                 query_result = domain.wait_until_query_done(query_id)
 
                 while not query_result:
-                    domain.stop_query(query_id)
+                    domain.cancel_query(query_id)
                     query_id = domain.run_query('Teaching 2', json.dumps(query_params))
                     query_result = domain.wait_until_query_done(query_id)
 
@@ -118,7 +118,7 @@ if __name__ == '__main__':
                     query_result = domain.wait_until_query_done(query_id)
 
                     while not query_result:
-                        domain.stop_query(query_id)
+                        domain.cancel_query(query_id)
                         query_id = domain.run_query('Teaching 3', json.dumps(query_params))
                         query_result = domain.wait_until_query_done(query_id)
 
@@ -153,7 +153,7 @@ if __name__ == '__main__':
                         query_result = domain.wait_until_query_done(query_id)
 
                         while not query_result:
-                            domain.stop_query(query_id)
+                            domain.cancel_query(query_id)
                             query_id = domain.run_query('Teaching 4', json.dumps(query_params))
                             query_result = domain.wait_until_query_done(query_id)
 
@@ -183,7 +183,7 @@ if __name__ == '__main__':
                             query_result = domain.wait_until_query_done(query_id)
 
                             while not query_result:
-                                domain.stop_query(query_id)
+                                domain.cancel_query(query_id)
                                 query_id = domain.run_query('Teaching 5', json.dumps(query_params))
                                 query_result = domain.wait_until_query_done(query_id)
 
@@ -232,7 +232,7 @@ if __name__ == '__main__':
             query_result = domain.wait_until_query_done(query_id)
 
             while not query_result:
-                domain.stop_query(query_id)
+                domain.cancel_query(query_id)
                 query_id = domain.run_query('Execute Skill 1', json.dumps(query_params))
                 query_result = domain.wait_until_query_done(query_id)
 
@@ -267,7 +267,7 @@ if __name__ == '__main__':
                     query_result = domain.wait_until_query_done(query_id)
 
                     while not query_result:
-                        domain.stop_query(query_id)
+                        domain.cancel_query(query_id)
                         query_id = domain.run_query('Execute Skill 2', json.dumps(query_params))
                         query_result = domain.wait_until_query_done(query_id)
 
@@ -294,7 +294,7 @@ if __name__ == '__main__':
                         query_result = domain.wait_until_query_done(query_id)
 
                         while not query_result:
-                            domain.stop_query(query_id)
+                            domain.cancel_query(query_id)
                             query_id = domain.run_query('Execute Skill 2', json.dumps(query_params))
                             query_result = domain.wait_until_query_done(query_id)
 

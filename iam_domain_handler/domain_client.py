@@ -56,7 +56,7 @@ class DomainClient:
             time.sleep(0.1)
         return (skill_status == 'success', query_status == 'success')
 
-    def wait_until_query_done(self, query_id, timeout=10):
+    def wait_until_query_done(self, query_id, timeout=30):
         query_status = self.get_query_status(query_id)
         current_time = 0
 
