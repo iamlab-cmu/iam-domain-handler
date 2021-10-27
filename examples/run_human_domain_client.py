@@ -23,6 +23,14 @@ if __name__ == '__main__':
                     'name' : 'Execute Skill',
                     'text' : '',
                 },
+                {
+                    'name' : 'Save Images',
+                    'text' : '',
+                },
+                {
+                    'name' : 'Label Images',
+                    'text' : '',
+                },
             ]
         }
 
@@ -320,3 +328,39 @@ if __name__ == '__main__':
                         domain.clear_human_inputs()        
             elif button_inputs['Cancel'] == 1:
                 domain.clear_human_inputs()
+        elif button_inputs['Save Images'] == 1:
+            domain.clear_human_inputs()
+
+            query_params = {
+                'instruction_text' : 'Press Save when you want to save images. Else press Done when you have finished.',
+                'buttons' : [
+                    {
+                        'name' : 'Save',
+                        'text' : '',
+                    },
+                    {
+                        'name' : 'Done',
+                        'text' : '',
+                    },
+                ]
+            }
+
+            image_num = 0
+
+            query_response = domain.run_query_until_done('Save Images '+str(image_num), query_params)
+            button_inputs = query_response['button_inputs']
+
+            while button_inputs['Save'] == 1:
+                domain.clear_human_inputs()
+
+                
+
+                image_num += 1
+                query_response = domain.run_query_until_done('Save Images '+str(image_num), query_params)
+                button_inputs = query_response['button_inputs']
+
+            if button_inputs['Done'] == 1:
+                domain.clear_human_inputs()
+
+        elif button_inputs['Label Images'] == 1:
+            domain.clear_human_inputs()

@@ -6,6 +6,7 @@ from .state_client import StateClient
 from .robot_client import RobotClient
 from .human_client import HumanClient
 from .memory_client import MemoryClient
+from .vision_client import VisionClient
 
 class DomainClient:
 
@@ -14,6 +15,7 @@ class DomainClient:
         self._robot_client = RobotClient()
         self._human_client = HumanClient()
         self._memory_client = MemoryClient()
+        self._vision_client = VisionClient()
 
     @property
     def state(self):
