@@ -119,3 +119,12 @@ class DomainClient:
 
     def clear_human_inputs(self):
         return self._memory_client.clear_memory(['buttons', 'sliders', 'text_inputs', 'bboxes', 'query_done'])
+
+    def save_image(self, image_topic):
+        return self._vision_client.save_image(image_topic)
+
+    def get_image(self, image_path=None):
+        return self._vision_client.get_image(image_path)
+
+    def label_image(self, image):
+        return self._human_client.label_image(image)

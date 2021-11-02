@@ -18,7 +18,7 @@ class HumanServer:
         self._state_client = StateClient()
         self._memory_client = MemoryClient()
         self._action_registry_client = ActionRegistryClient()
-        self._human_interface_pub = rospy.Publisher('/human_interface_request', Request, queue_size=1000)
+        self._human_interface_pub = rospy.Publisher('/human_interface_request', Request, queue_size=10)
         self._state_server_reset_pub = rospy.Publisher('/reset_query_done_state', Confirmation, queue_size=10)
         self._run_query_srv = rospy.Service('run_query', RunQuery, self._run_query_srv_handler)
 

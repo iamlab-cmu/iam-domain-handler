@@ -3,6 +3,7 @@ import rospy
 
 from domain_handler_msgs.srv import RunQuery
 from .action_registry_client import ActionRegistryClient
+from bokeh_server_msgs.msg import Request
 
 
 class HumanClient:
@@ -13,6 +14,7 @@ class HumanClient:
         self._action_registry_client = ActionRegistryClient()
 
         self._run_query_srv_proxy = rospy.ServiceProxy(self._run_query_srv_name, RunQuery)
+        self._bokeh_request_pub = rospy.Publisher('/bokeh_request', Request, queue_size=10)
 
         self._running_query_id = None
 
@@ -35,3 +37,21 @@ class HumanClient:
 
     def cancel_query(self, query_id):
         return self._action_registry_client.set_action_status(query_id, 'success')
+
+    def cancel_query(self, query_id):
+        return self._action_registry_client.set_action_status(query_id, 'success')
+
+    def label_image(self, image):
+        req = {}
+        req['display_type'] = 1
+        req['image'] = image
+        self.send_bokeh_request(req)
+
+    def send_bokeh_request(self, req):
+        bokeh_request_msg = Request()
+        bokeh_request_msg.display_type = req['display_type']
+        if req['display_type'] == 0:
+            bokeh_request_msg.traj = req['traj']
+        elif req['display_type'] == 1:
+            bokeh_request_msg.image = req['image']
+        self._bokeh_request_pub.publish(bokeh_request_msg)

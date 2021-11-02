@@ -5,7 +5,7 @@ import time
 from iam_domain_handler.domain_client import DomainClient
 
 if __name__ == '__main__':
-    #rospy.init_node('run_domain_client')
+    rospy.init_node('run_domain_client')
     domain = DomainClient()
 
     while not rospy.is_shutdown():
@@ -151,7 +151,7 @@ if __name__ == '__main__':
                             query_params = {
                                 'instruction_text' : 'Press Ok if the recorded trajectory looks good.',
                                 'display_type' : 2,
-                                'camera_topic' : '/camera/rgb/image_raw',
+                                'camera_topic' : '/rgb/image_raw',
                                 'buttons' : [
                                     {
                                         'name' : 'Ok',
@@ -353,7 +353,7 @@ if __name__ == '__main__':
             while button_inputs['Save'] == 1:
                 domain.clear_human_inputs()
 
-                
+                domain.save_image('/rgb/image_raw')
 
                 image_num += 1
                 query_response = domain.run_query_until_done('Save Images '+str(image_num), query_params)
@@ -364,3 +364,21 @@ if __name__ == '__main__':
 
         elif button_inputs['Label Images'] == 1:
             domain.clear_human_inputs()
+
+            (success, image_path, image) = domain.get_image()
+
+            if success:
+            
+                query_params = {
+                    'instruction_text' : 'Label the image. Press submit when you are done labeling an image.',
+                    'display_type' : 3,
+                }
+                query_id = domain.run_query('Label Image', json.dumps(query_params))
+
+                time.sleep(1)
+
+                domain.label_image(image)
+
+                query_response = domain.wait_until_query_done(query_id)
+
+
