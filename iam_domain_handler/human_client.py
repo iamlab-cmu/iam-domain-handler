@@ -47,11 +47,17 @@ class HumanClient:
         req['image'] = image
         self.send_bokeh_request(req)
 
+    def get_point_goals(self, image):
+        req = {}
+        req['display_type'] = 2
+        req['image'] = image
+        self.send_bokeh_request(req)
+
     def send_bokeh_request(self, req):
         bokeh_request_msg = Request()
         bokeh_request_msg.display_type = req['display_type']
         if req['display_type'] == 0:
             bokeh_request_msg.traj = req['traj']
-        elif req['display_type'] == 1:
+        elif req['display_type'] == 1 or req['display_type'] == 2:
             bokeh_request_msg.image = req['image']
         self._bokeh_request_pub.publish(bokeh_request_msg)

@@ -128,3 +128,6 @@ class DomainClient:
 
     def label_image(self, image):
         return self._human_client.label_image(image)
+
+    def get_point_goals(self, image):
+        return self._human_client.get_point_goals(image)

@@ -31,6 +31,10 @@ if __name__ == '__main__':
                     'name' : 'Label Images',
                     'text' : '',
                 },
+                {
+                    'name' : 'Select Point Goals',
+                    'text' : '',
+                },
             ]
         }
 
@@ -378,6 +382,25 @@ if __name__ == '__main__':
                 time.sleep(1)
 
                 domain.label_image(image)
+
+                query_response = domain.wait_until_query_done(query_id)
+
+        elif button_inputs['Select Point Goals'] == 1:
+            domain.clear_human_inputs()
+
+            (success, image_path, image) = domain.get_image()
+
+            if success:
+            
+                query_params = {
+                    'instruction_text' : 'Click points on the image corresponding to goal locations for an object. Press submit when done.',
+                    'display_type' : 3,
+                }
+                query_id = domain.run_query('Get Point Goals', json.dumps(query_params))
+
+                time.sleep(1)
+
+                domain.get_point_goals(image)
 
                 query_response = domain.wait_until_query_done(query_id)
 
