@@ -5,7 +5,7 @@ import time
 from iam_domain_handler.domain_client import DomainClient
 
 if __name__ == '__main__':
-    rospy.init_node('run_domain_client')
+    #rospy.init_node('run_domain_client')
     domain = DomainClient()
 
     while not rospy.is_shutdown():
@@ -357,7 +357,7 @@ if __name__ == '__main__':
             while button_inputs['Save'] == 1:
                 domain.clear_human_inputs()
 
-                domain.save_image('/rgb/image_raw')
+                domain.save_camera_image('/rgb/image_raw')
 
                 image_num += 1
                 query_response = domain.run_query_until_done('Save Images '+str(image_num), query_params)
@@ -376,31 +376,29 @@ if __name__ == '__main__':
                 query_params = {
                     'instruction_text' : 'Label the image. Press submit when you are done labeling an image.',
                     'display_type' : 3,
+                    'bokeh_display_type' : 1,
+                    'bokeh_image' : image.tolist(),
                 }
                 query_id = domain.run_query('Label Image', json.dumps(query_params))
-
-                time.sleep(1)
-
-                domain.label_image(image)
 
                 query_response = domain.wait_until_query_done(query_id)
 
         elif button_inputs['Select Point Goals'] == 1:
             domain.clear_human_inputs()
 
+            domain.save_camera_image('/rgb/image_raw')
+
             (success, image_path, image) = domain.get_image()
 
             if success:
-            
+
                 query_params = {
                     'instruction_text' : 'Click points on the image corresponding to goal locations for an object. Press submit when done.',
                     'display_type' : 3,
+                    'bokeh_display_type' : 2,
+                    'bokeh_image' : image.tolist(),
                 }
                 query_id = domain.run_query('Get Point Goals', json.dumps(query_params))
-
-                time.sleep(1)
-
-                domain.get_point_goals(image)
 
                 query_response = domain.wait_until_query_done(query_id)
 

@@ -1,6 +1,11 @@
 import json
-from web_interface_msgs.msg import Request, Button, Slider, TextInput, Bbox
+import numpy as np
+from web_interface_msgs.msg import Request as webrequest
+from bokeh_server_msgs.msg import Request as bokehrequest
+from web_interface_msgs.msg import Button, Slider, TextInput, Bbox
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint 
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
 
 def from_dict_button_to_msg_button(button):
     b = Button()
@@ -64,9 +69,11 @@ def from_trajs_to_msg_trajs(trajs):
     pts_msg.joint_names = joint_names
     return pts_msg
 
-def params_to_human_interface_request_msg(params):
+def params_to_web_interface_request_msg(params):
     params = json.loads(params)
-    hi_msg = Request()    
+    hi_msg = webrequest()  
+    pub_bokeh_msg = False
+
     if 'buttons' in params:
         hi_msg.buttons = [from_dict_button_to_msg_button(button) for button in params['buttons']] 
     if 'sliders' in params:
@@ -85,8 +92,24 @@ def params_to_human_interface_request_msg(params):
         hi_msg.camera_topic = params['camera_topic']
     if 'display_type' in params:
         hi_msg.display_type = params['display_type']
+        if hi_msg.display_type == 3:
+            pub_bokeh_msg = True
     if 'robot' in params:
         hi_msg.robot = params['robot']
     if 'robot_joint_topic' in params:
         hi_msg.robot_joint_topic = params['robot_joint_topic']
-    return hi_msg
+    return (hi_msg, pub_bokeh_msg)
+
+def params_to_bokeh_request_msg(params):
+    params = json.loads(params)
+    bokeh_msg = bokehrequest()  
+    bridge = CvBridge()  
+    
+    if 'bokeh_display_type' in params:
+        bokeh_msg.display_type = params['bokeh_display_type']
+    if 'bokeh_traj' in params:
+        bokeh_msg.traj = params['bokeh_traj']
+    if 'bokeh_image' in params:
+        bokeh_msg.image = bridge.cv2_to_imgmsg(np.array(params['bokeh_image'], dtype=np.uint8))
+
+    return bokeh_msg

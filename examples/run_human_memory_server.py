@@ -7,6 +7,7 @@ from trajectory_msgs.msg import JointTrajectory
 from domain_handler_msgs.msg import GetTrajectory
 
 from web_interface_msgs.msg import Reply, Confirmation
+from bokeh_server_msgs.msg import Response
 from iam_domain_handler.human_memory_server import HumanMemoryServer
 from std_msgs.msg import Int32
 
@@ -27,16 +28,26 @@ def human_interface_reply_handler(data):
     text_inputs = {}
     for text_input in data.text_inputs:
         text_inputs[text_input.name] = text_input.value
-
-    bboxes = {}
-    for bbox in data.bboxes:
-        bboxes[bbox.name] = bbox.value
     
     return {
         'buttons' : buttons,
         'sliders' : sliders,
         'text_inputs' : text_inputs,
-        'bboxes' : bboxes,
+        'query_done' : True,
+    }
+
+def bokeh_server_response_handler(data):
+    '''
+    response_type, object_names, masks, dmp_params, desired_positions, bounding_boxes
+    '''
+    
+    return {
+        'bokeh_response_type' : data.response_type,
+        'object_names' : data.object_names,
+        'masks' : data.masks,
+        'dmp_params' : data.dmp_params,
+        'desired_positions' : data.desired_positions,
+        'bounding_boxes' : data.bounding_boxes,
         'query_done' : True,
     }
 
@@ -64,6 +75,7 @@ def skill_trajectory_handler(data):
 if __name__ == '__main__':
     human_interface_handlers = [
         ('/human_interface_reply', Reply, human_interface_reply_handler),
+        ('/bokeh_response', Response, bokeh_server_response_handler),
         ('/reset_query_done_state', Confirmation, human_server_reset_handler),
     ]
     

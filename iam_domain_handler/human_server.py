@@ -1,12 +1,14 @@
 import rospy
 
 from domain_handler_msgs.srv import RunQuery
-from web_interface_msgs.msg import Request, Confirmation
+from web_interface_msgs.msg import Request as webrequest
+from web_interface_msgs.msg import Confirmation
+from bokeh_server_msgs.msg import Request as bokehrequest
 
 from .state_client import StateClient
 from .memory_client import MemoryClient
 from .action_registry_client import ActionRegistryClient
-from .human_interface_msg_process import params_to_human_interface_request_msg
+from .human_interface_msg_process import params_to_web_interface_request_msg, params_to_bokeh_request_msg
 from std_msgs.msg import Int32
 
 
@@ -18,7 +20,8 @@ class HumanServer:
         self._state_client = StateClient()
         self._memory_client = MemoryClient()
         self._action_registry_client = ActionRegistryClient()
-        self._human_interface_pub = rospy.Publisher('/human_interface_request', Request, queue_size=10)
+        self._human_interface_pub = rospy.Publisher('/human_interface_request', webrequest, queue_size=10)
+        self._bokeh_request_pub = rospy.Publisher('/bokeh_request', bokehrequest, queue_size=10)
         self._state_server_reset_pub = rospy.Publisher('/reset_query_done_state', Confirmation, queue_size=10)
         self._run_query_srv = rospy.Service('run_query', RunQuery, self._run_query_srv_handler)
 
@@ -28,12 +31,16 @@ class HumanServer:
     def _run_query_srv_handler(self, req):                
         query_info = self._action_registry_client.get_action_info(req.query_id)
         self._action_registry_client.set_action_status(req.query_id, 'running')
-        hi_msg = params_to_human_interface_request_msg(query_info.action_param)
+        (hi_msg, pub_bokeh_msg) = params_to_web_interface_request_msg(query_info.action_param)
         
         reset_msg = Confirmation()
         reset_msg.succeed = False
         self._state_server_reset_pub.publish(reset_msg)
         self._human_interface_pub.publish(hi_msg)
+        if pub_bokeh_msg:
+            rospy.sleep(1)
+            bokeh_msg = params_to_bokeh_request_msg(query_info.action_param)
+            self._bokeh_request_pub.publish(bokeh_msg)
         rospy.loginfo('Published query message to human interface...')
 
         query_not_done = False 
