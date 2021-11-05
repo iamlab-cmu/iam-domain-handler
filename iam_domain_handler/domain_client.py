@@ -45,6 +45,8 @@ class DomainClient:
         has_buttons = ('buttons' in query_param.keys())
         has_sliders = ('sliders' in query_param.keys())
         has_text_inputs = ('text_inputs' in query_param.keys())
+        has_masks = ('bokeh_display_type' in query_param.keys() and query_param['bokeh_display_type'] == 1)
+        has_points = ('bokeh_display_type' in query_param.keys() and query_param['bokeh_display_type'] == 2)
 
         query_id = self.run_query(query_name, json.dumps(query_param))
         query_result = self.wait_until_query_done(query_id, timeout)
@@ -78,6 +80,16 @@ class DomainClient:
                         query_result = False
                         continue
                 response['text_inputs'] = text_inputs
+            if has_masks:
+                masks = self.get_memory_objects(['masks'])['masks']
+                response['masks'] = masks
+                object_names = self.get_memory_objects(['object_names'])['object_names']
+                response['object_names'] = object_names
+                bounding_boxes = self.get_memory_objects(['bounding_boxes'])['bounding_boxes']
+                response['bounding_boxes'] = bounding_boxes
+            if has_points:
+                desired_positions = self.get_memory_objects(['desired_positions'])['desired_positions']
+                response['desired_positions'] = desired_positions
             query_complete = True
 
         return response

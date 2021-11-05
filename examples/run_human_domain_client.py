@@ -379,9 +379,10 @@ if __name__ == '__main__':
                     'bokeh_display_type' : 1,
                     'bokeh_image' : image.tolist(),
                 }
-                query_id = domain.run_query('Label Image', json.dumps(query_params))
 
-                query_response = domain.wait_until_query_done(query_id)
+                query_response = domain.run_query_until_done('Label Image', query_params)
+                masks = query_response['masks']
+                domain.save_image()
 
         elif button_inputs['Select Point Goals'] == 1:
             domain.clear_human_inputs()
@@ -398,8 +399,7 @@ if __name__ == '__main__':
                     'bokeh_display_type' : 2,
                     'bokeh_image' : image.tolist(),
                 }
-                query_id = domain.run_query('Get Point Goals', json.dumps(query_params))
 
-                query_response = domain.wait_until_query_done(query_id)
+                query_response = domain.run_query_until_done('Get Point Goals', query_params)
 
 
