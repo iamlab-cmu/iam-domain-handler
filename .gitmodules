@@ -1,0 +1,3 @@
+[submodule "catkin_ws/src/domain-handler-msgs"]
+	path = catkin_ws/src/domain-handler-msgs
+	url = https://github.com/iamlab-cmu/domain-handler-msgs.git
