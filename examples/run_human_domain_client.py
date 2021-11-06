@@ -14,6 +14,7 @@ if __name__ == '__main__':
         text_inputs = []
 
         query_params = {
+            'display_type' : 0, 
             'buttons' : [
                 {
                     'name' : 'Teach Skill',
@@ -381,9 +382,9 @@ if __name__ == '__main__':
                 }
 
                 query_response = domain.run_query_until_done('Label Image', query_params)
-                masks = query_response['masks']
-                domain.save_image()
-
+                domain.save_image_labels(image_path, query_response['object_names'], query_response['masks'], query_response['bounding_boxes'])
+                domain.clear_human_inputs()
+                
         elif button_inputs['Select Point Goals'] == 1:
             domain.clear_human_inputs()
 
@@ -401,5 +402,5 @@ if __name__ == '__main__':
                 }
 
                 query_response = domain.run_query_until_done('Get Point Goals', query_params)
-
+                domain.clear_human_inputs()
 

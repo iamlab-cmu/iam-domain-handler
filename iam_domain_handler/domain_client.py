@@ -45,7 +45,7 @@ class DomainClient:
         has_buttons = ('buttons' in query_param.keys())
         has_sliders = ('sliders' in query_param.keys())
         has_text_inputs = ('text_inputs' in query_param.keys())
-        has_masks = ('bokeh_display_type' in query_param.keys() and query_param['bokeh_display_type'] == 1)
+        label_image = ('bokeh_display_type' in query_param.keys() and query_param['bokeh_display_type'] == 1)
         has_points = ('bokeh_display_type' in query_param.keys() and query_param['bokeh_display_type'] == 2)
 
         query_id = self.run_query(query_name, json.dumps(query_param))
@@ -80,11 +80,11 @@ class DomainClient:
                         query_result = False
                         continue
                 response['text_inputs'] = text_inputs
-            if has_masks:
-                masks = self.get_memory_objects(['masks'])['masks']
-                response['masks'] = masks
+            if label_image:
                 object_names = self.get_memory_objects(['object_names'])['object_names']
                 response['object_names'] = object_names
+                masks = self.get_memory_objects(['masks'])['masks']
+                response['masks'] = masks
                 bounding_boxes = self.get_memory_objects(['bounding_boxes'])['bounding_boxes']
                 response['bounding_boxes'] = bounding_boxes
             if has_points:
@@ -145,6 +145,9 @@ class DomainClient:
 
     def save_image(self, image_path, image):
         return self._vision_client.save_image(image_path, image)
+
+    def save_image_labels(self, image_path, object_names, masks, bounding_boxes):
+        return self._vision_client.save_image_labels(image_path, object_names, masks, bounding_boxes)
 
     def get_image(self, image_path=None):
         return self._vision_client.get_image(image_path)

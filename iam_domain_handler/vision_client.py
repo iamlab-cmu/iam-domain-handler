@@ -26,8 +26,19 @@ class VisionClient:
     def save_image(self, image_path, image):
         request = IAMVisionRequest()
         request.request_type = 2
-        request.camera_topic_name = camera_topic
+        request.image_path = image_path
         request.image = self.bridge.cv2_to_imgmsg(image)
+        resp = self._iam_vision_srv_proxy(request)
+
+        return (resp.request_success, resp.image_path)
+
+    def save_image_labels(self, image_path, object_names, masks, bounding_boxes):
+        request = IAMVisionRequest()
+        request.request_type = 3
+        request.image_path = image_path
+        request.object_names = object_names
+        request.masks = masks
+        request.bounding_boxes = bounding_boxes
         resp = self._iam_vision_srv_proxy(request)
 
         return (resp.request_success, resp.image_path)
