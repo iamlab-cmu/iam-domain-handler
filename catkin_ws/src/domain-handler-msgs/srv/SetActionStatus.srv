@@ -1,4 +1,0 @@
-string action_id
-string action_status
----
-string prev_action_status
