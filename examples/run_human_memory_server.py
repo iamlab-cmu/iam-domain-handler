@@ -43,6 +43,7 @@ def bokeh_server_response_handler(data):
     
     return {
         'bokeh_response_type' : data.response_type,
+        'request_next_image' : data.request_next_image,
         'object_names' : data.object_names,
         'masks' : data.masks,
         'dmp_params' : data.dmp_params,

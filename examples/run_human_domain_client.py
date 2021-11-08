@@ -370,9 +370,9 @@ if __name__ == '__main__':
         elif button_inputs['Label Images'] == 1:
             domain.clear_human_inputs()
 
-            (success, image_path, image) = domain.get_image()
+            (label_image, image_path, image) = domain.get_image()
 
-            if success:
+            while label_image:
             
                 query_params = {
                     'instruction_text' : 'Label the image. Press submit when you are done labeling an image.',
@@ -383,6 +383,11 @@ if __name__ == '__main__':
 
                 query_response = domain.run_query_until_done('Label Image', query_params)
                 domain.save_image_labels(image_path, query_response['object_names'], query_response['masks'], query_response['bounding_boxes'])
+                
+                if query_response['request_next_image']:
+                    (label_image, image_path, image) = domain.get_image()
+                else:
+                    label_image = False
                 domain.clear_human_inputs()
                 
         elif button_inputs['Select Point Goals'] == 1:

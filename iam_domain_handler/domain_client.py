@@ -81,12 +81,7 @@ class DomainClient:
                         continue
                 response['text_inputs'] = text_inputs
             if label_image:
-                object_names = self.get_memory_objects(['object_names'])['object_names']
-                response['object_names'] = object_names
-                masks = self.get_memory_objects(['masks'])['masks']
-                response['masks'] = masks
-                bounding_boxes = self.get_memory_objects(['bounding_boxes'])['bounding_boxes']
-                response['bounding_boxes'] = bounding_boxes
+                response = self.get_memory_objects(['request_next_image', 'object_names', 'masks', 'bounding_boxes'])
             if has_points:
                 desired_positions = self.get_memory_objects(['desired_positions'])['desired_positions']
                 response['desired_positions'] = desired_positions
@@ -138,7 +133,10 @@ class DomainClient:
         return self._memory_client.clear_memory(keys)
 
     def clear_human_inputs(self):
-        return self._memory_client.clear_memory(['buttons', 'sliders', 'text_inputs', 'bboxes', 'query_done'])
+        return self._memory_client.clear_memory(['buttons', 'sliders', 'text_inputs', 
+                                                 'request_next_image', 'object_names', 
+                                                 'masks', 'bounding_boxes', 'desired_positions', 
+                                                 'query_done'])
 
     def save_camera_image(self, camera_topic):
         return self._vision_client.save_camera_image(camera_topic)
