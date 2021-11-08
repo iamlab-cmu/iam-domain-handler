@@ -6,7 +6,7 @@ from frankapy import FrankaConstants as FC
 from frankapy.proto_utils import sensor_proto2ros_msg, make_sensor_group_msg
 from frankapy.proto import PosePositionSensorMessage, JointPositionSensorMessage, ShouldTerminateSensorMessage
 from franka_interface_msgs.msg import SensorDataGroup
-from frankapy.utils import convert_rigid_transform_to_array
+from frankapy.utils import convert_rigid_transform_to_array, convert_array_to_rigid_transform
 
 from domain_handler_msgs.srv import RunSkill, GetSkillTraj 
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
@@ -28,7 +28,8 @@ class RobotServer:
         # Only support gripper skill or skills that stream ee or joint trajs for now
         for skill in self._skills_dict.values():
             assert isinstance(skill, BaseStreamTrajSkill) or isinstance(skill, BaseGripperSkill) \
-            or isinstance(skill, BaseForceSkill) or isinstance(skill, BaseOneStepJointSkill)
+            or isinstance(skill, BaseForceSkill) or isinstance(skill, BaseOneStepJointSkill) \
+            or isinstance(skill, BaseOneStepPoseSkill)
         
         self._fa = FrankaArm()
         self._state_client = StateClient()
@@ -93,6 +94,24 @@ class RobotServer:
             rate = rospy.Rate(1 / policy.dt)
             t_step = 0
             self._fa.goto_joints(joints=policy.goal_joints, duration=policy.duration, block=False)
+
+            while True:
+                state = self._state_client.get_state()
+                t_step += 1
+
+                if skill.termination_condition_satisfied(state, param, policy, t_step) > 0.5 \
+                or self._action_registry_client.get_action_status(skill_id) == 'cancelled':
+                    self._fa.stop_skill()
+                    break
+
+                rate.sleep()
+
+            return 1
+        elif policy.cmd_type == CmdType.ONESTEPPOSE:
+
+            rate = rospy.Rate(1 / policy.dt)
+            t_step = 0
+            self._fa.goto_pose(convert_array_to_rigid_transform(np.array(policy.goal_pose)), duration=policy.duration, block=False)
 
             while True:
                 state = self._state_client.get_state()

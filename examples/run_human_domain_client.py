@@ -1,6 +1,10 @@
 import rospy
 import json
 import time
+import math
+import numpy as np
+from autolab_core import RigidTransform
+from frankapy.utils import convert_rigid_transform_to_array
 
 from iam_domain_handler.domain_client import DomainClient
 
@@ -358,7 +362,7 @@ if __name__ == '__main__':
             while button_inputs['Save'] == 1:
                 domain.clear_human_inputs()
 
-                domain.save_camera_image('/rgb/image_raw')
+                domain.save_rgb_camera_image('/rgb/image_raw')
 
                 image_num += 1
                 query_response = domain.run_query_until_done('Save Images '+str(image_num), query_params)
@@ -370,7 +374,7 @@ if __name__ == '__main__':
         elif button_inputs['Label Images'] == 1:
             domain.clear_human_inputs()
 
-            (label_image, image_path, image) = domain.get_image()
+            (label_image, image_path, image) = domain.get_rgb_image()
 
             while label_image:
             
@@ -385,7 +389,7 @@ if __name__ == '__main__':
                 domain.save_image_labels(image_path, query_response['object_names'], query_response['masks'], query_response['bounding_boxes'])
                 
                 if query_response['request_next_image']:
-                    (label_image, image_path, image) = domain.get_image()
+                    (label_image, image_path, image) = domain.get_rgb_image()
                 else:
                     label_image = False
                 domain.clear_human_inputs()
@@ -393,9 +397,11 @@ if __name__ == '__main__':
         elif button_inputs['Select Point Goals'] == 1:
             domain.clear_human_inputs()
 
-            domain.save_camera_image('/rgb/image_raw')
+            (rgb_image_success, rgb_image_path) = domain.save_rgb_camera_image('/rgb/image_raw')
+            depth_image_path = rgb_image_path[:rgb_image_path.rfind('/')+1] + 'depth_' + rgb_image_path[rgb_image_path.rfind('/')+1:]
+            (depth_image_success, depth_image_path) = domain.save_depth_camera_image('/depth_to_rgb/image_raw', depth_image_path)
 
-            (success, image_path, image) = domain.get_image()
+            (success, image_path, image) = domain.get_rgb_image(rgb_image_path)
 
             if success:
 
@@ -407,5 +413,180 @@ if __name__ == '__main__':
                 }
 
                 query_response = domain.run_query_until_done('Get Point Goals', query_params)
+
+                (goal_points_success, goal_points) = domain.get_goal_points(depth_image_path, query_response['desired_positions'])
+
                 domain.clear_human_inputs()
 
+                query_params = {
+                    'instruction_text' : 'Press Start when you are safely away from the robot.',
+                    'buttons' : [
+                        {
+                            'name' : 'Start',
+                            'text' : '',
+                        },
+                        {
+                            'name' : 'Cancel',
+                            'text' : '',
+                        },
+                    ],
+                }
+                query_response = domain.run_query_until_done('Pick and Place 1', query_params)
+                button_inputs = query_response['button_inputs']
+
+                if button_inputs['Start'] == 1:
+                    domain.clear_human_inputs()
+
+                    skill_params = {
+                        'duration' : 5,
+                        'dt' : 0.01,
+                        'goal_joints' : [0, -math.pi / 4, 0, -3 * math.pi / 4, 0, math.pi / 2, math.pi / 4]
+                    }
+                    skill_id = domain.run_skill('one_step_joint', json.dumps(skill_params))
+
+                    query_params = {
+                        'instruction_text' : 'Press Cancel if you would like to stop the robot.',
+                        'buttons' : [
+                            {
+                                'name' : 'Cancel',
+                                'text' : '',
+                            },
+                        ]
+                    }
+                    query_id = domain.run_query('Pick and Place 2', json.dumps(query_params))
+                    (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
+
+                    if skill_done:
+                        goal_pose_1 = goal_points[0]
+                        goal_pose_1.y -= 0.04
+                        intermediate_height_offset = 0.11
+                        tong_height = 0.22
+                        intermediate_pose = RigidTransform(rotation=np.array([
+                            [1, 0, 0],
+                            [0, -1, 0],
+                            [0, 0, -1],
+                        ]), translation=np.array([goal_pose_1.x, goal_pose_1.y, tong_height+intermediate_height_offset]))
+
+                        grasp_pose = RigidTransform(rotation=np.array([
+                            [1, 0, 0],
+                            [0, -1, 0],
+                            [0, 0, -1],
+                        ]), translation=np.array([goal_pose_1.x, goal_pose_1.y, tong_height]))
+
+                        skill_params = {
+                            'duration' : 5,
+                            'dt' : 0.01,
+                            'goal_pose' : list(convert_rigid_transform_to_array(intermediate_pose))
+                        }
+                        skill_id = domain.run_skill('one_step_pose', json.dumps(skill_params))
+
+                        (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
+                        if skill_done:
+                            skill_params = {
+                                'duration' : 5,
+                                'dt' : 0.01,
+                                'goal_pose' : list(convert_rigid_transform_to_array(grasp_pose))
+                            }
+                            skill_id = domain.run_skill('one_step_pose', json.dumps(skill_params))
+                            (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
+                            if skill_done:
+                                skill_id = domain.run_skill('close_gripper', '')
+                                (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
+                                if skill_done:
+                                    skill_params = {
+                                        'duration' : 5,
+                                        'dt' : 0.01,
+                                        'goal_pose' : list(convert_rigid_transform_to_array(intermediate_pose))
+                                    }
+                                    skill_id = domain.run_skill('one_step_pose', json.dumps(skill_params))
+                                    (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
+                                    if skill_done:
+                                        skill_params = {
+                                            'duration' : 5,
+                                            'dt' : 0.01,
+                                            'goal_pose' : list(convert_rigid_transform_to_array(grasp_pose))
+                                        }
+                                        skill_id = domain.run_skill('one_step_pose', json.dumps(skill_params))
+                                        (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
+                                        if skill_done:
+                                            skill_id = domain.run_skill('open_gripper', '')
+                                            (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
+                                            if skill_done:
+                                                skill_params = {
+                                                    'duration' : 5,
+                                                    'dt' : 0.01,
+                                                    'goal_pose' : list(convert_rigid_transform_to_array(intermediate_pose))
+                                                }
+                                                skill_id = domain.run_skill('one_step_pose', json.dumps(skill_params))
+                                                (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
+                                                if skill_done:
+                                                    skill_params = {
+                                                        'duration' : 5,
+                                                        'dt' : 0.01,
+                                                        'goal_joints' : [0, -math.pi / 4, 0, -3 * math.pi / 4, 0, math.pi / 2, math.pi / 4]
+                                                    }
+                                                    skill_id = domain.run_skill('one_step_joint', json.dumps(skill_params))
+                                                    (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
+
+                                                    if skill_done:
+                                                        domain.cancel_query(query_id)
+                                                        domain.clear_human_inputs()
+
+                                                    elif query_done:
+                                                        button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+
+                                                        if button_inputs['Cancel'] == 1:
+                                                            domain.cancel_skill(skill_id)
+                                                            domain.clear_human_inputs()
+
+                                                elif query_done:
+                                                    button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+
+                                                    if button_inputs['Cancel'] == 1:
+                                                        domain.cancel_skill(skill_id)
+                                                        domain.clear_human_inputs()
+                                            elif query_done:
+                                                button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+
+                                                if button_inputs['Cancel'] == 1:
+                                                    domain.cancel_skill(skill_id)
+                                                    domain.clear_human_inputs()
+                                        elif query_done:
+                                            button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+
+                                            if button_inputs['Cancel'] == 1:
+                                                domain.cancel_skill(skill_id)
+                                                domain.clear_human_inputs()
+                                    elif query_done:
+                                        button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+
+                                        if button_inputs['Cancel'] == 1:
+                                            domain.cancel_skill(skill_id)
+                                            domain.clear_human_inputs()
+                                elif query_done:
+                                    button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+
+                                    if button_inputs['Cancel'] == 1:
+                                        domain.cancel_skill(skill_id)
+                                        domain.clear_human_inputs()
+                            elif query_done:
+                                button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+
+                                if button_inputs['Cancel'] == 1:
+                                    domain.cancel_skill(skill_id)
+                                    domain.clear_human_inputs()
+                        elif query_done:
+                            button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+
+                            if button_inputs['Cancel'] == 1:
+                                domain.cancel_skill(skill_id)
+                                domain.clear_human_inputs()
+                    elif query_done:
+                        button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+
+                        if button_inputs['Cancel'] == 1:
+                            domain.cancel_skill(skill_id)
+                            domain.clear_human_inputs()
+
+                elif button_inputs['Cancel'] == 1:
+                    domain.clear_human_inputs()

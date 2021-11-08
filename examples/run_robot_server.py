@@ -21,7 +21,8 @@ if __name__ == '__main__':
         'zero_force': ZeroForceSkill(),
         'record_trajectory': RecordSkill(),
         'stream_joint_traj': StreamJointTrajSkill(),
-        'one_step_joint': GoToJointsSkill()
+        'one_step_joint': GoToJointsSkill(),
+        'one_step_pose': GoToPoseSkill()
     }
     server = RobotServer(skills_dict)
     

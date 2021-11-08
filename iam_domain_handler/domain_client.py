@@ -83,8 +83,7 @@ class DomainClient:
             if label_image:
                 response = self.get_memory_objects(['request_next_image', 'object_names', 'masks', 'bounding_boxes'])
             if has_points:
-                desired_positions = self.get_memory_objects(['desired_positions'])['desired_positions']
-                response['desired_positions'] = desired_positions
+                response = self.get_memory_objects(['object_names', 'desired_positions'])
             query_complete = True
 
         return response
@@ -138,14 +137,26 @@ class DomainClient:
                                                  'masks', 'bounding_boxes', 'desired_positions', 
                                                  'query_done'])
 
-    def save_camera_image(self, camera_topic):
-        return self._vision_client.save_camera_image(camera_topic)
+    def save_rgb_camera_image(self, camera_topic):
+        return self._vision_client.save_rgb_camera_image(camera_topic)
 
-    def save_image(self, image_path, image):
-        return self._vision_client.save_image(image_path, image)
+    def save_depth_camera_image(self, camera_topic, depth_image_path):
+        return self._vision_client.save_depth_camera_image(camera_topic, depth_image_path)
+
+    def save_rgb_image(self, image_path, image):
+        return self._vision_client.save_rgb_image(image_path, image)
+
+    def save_depth_image(self, image_path, image):
+        return self._vision_client.save_depth_image(image_path, image)
 
     def save_image_labels(self, image_path, object_names, masks, bounding_boxes):
         return self._vision_client.save_image_labels(image_path, object_names, masks, bounding_boxes)
 
-    def get_image(self, image_path=None):
-        return self._vision_client.get_image(image_path)
+    def get_rgb_image(self, rgb_image_path=None):
+        return self._vision_client.get_rgb_image(rgb_image_path)
+
+    def get_depth_image(self, depth_image_path=None):
+        return self._vision_client.get_depth_image(depth_image_path)
+
+    def get_goal_points(self, depth_image_path, desired_positions):
+        return self._vision_client.get_goal_points(depth_image_path, desired_positions)
