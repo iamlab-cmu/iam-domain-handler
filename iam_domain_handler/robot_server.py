@@ -29,7 +29,8 @@ class RobotServer:
         for skill in self._skills_dict.values():
             assert isinstance(skill, BaseStreamTrajSkill) or isinstance(skill, BaseGripperSkill) \
             or isinstance(skill, BaseForceSkill) or isinstance(skill, BaseOneStepJointSkill) \
-            or isinstance(skill, BaseOneStepPoseSkill) or isinstance(skill, BaseOneStepJointDmpSkill)
+            or isinstance(skill, BaseOneStepPoseSkill) or isinstance(skill, BaseOneStepJointDmpSkill) \
+            or isinstance(skill, BaseOneStepQuatPoseDmpSkill)
         
         self._fa = FrankaArm()
         self._state_client = StateClient()
@@ -130,6 +131,24 @@ class RobotServer:
             rate = rospy.Rate(1 / policy.dt)
             t_step = 0
             self._fa.execute_joint_dmp(policy.dmp_params, duration=policy.duration, block=False)
+
+            while True:
+                state = self._state_client.get_state()
+                t_step += 1
+
+                if skill.termination_condition_satisfied(state, param, policy, t_step) > 0.5 \
+                or self._action_registry_client.get_action_status(skill_id) == 'cancelled':
+                    self._fa.stop_skill()
+                    break
+
+                rate.sleep()
+
+            return 1
+        elif policy.cmd_type == CmdType.ONESTEPQUATPOSEDMP:
+
+            rate = rospy.Rate(1 / policy.dt)
+            t_step = 0
+            self._fa.execute_quaternion_pose_dmp(policy.position_dmp_params, policy.quat_dmp_params, duration=policy.duration, goal_quat=self._fa.get_pose().quaternion, goal_quat_time=policy.duration, block=False)
 
             while True:
                 state = self._state_client.get_state()

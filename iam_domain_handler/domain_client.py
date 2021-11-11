@@ -40,7 +40,7 @@ class DomainClient:
     def run_query(self, query_name, query_param):
         return self._human_client.run_query(query_name, query_param)
 
-    def run_query_until_done(self, query_name, query_param, timeout=30):
+    def run_query_until_done(self, query_name, query_param, timeout=300):
 
         response = {}
         has_buttons = ('buttons' in query_param.keys())
@@ -86,6 +86,7 @@ class DomainClient:
             if has_dmp_params:
                 dmp_info = self.get_memory_objects(['dmp_params'])['dmp_params']
                 dmp_params = {}
+                quat_dmp_params = {}
                 dmp_params['dmp_type'] = dmp_info.dmp_type
                 dmp_params['tau'] = dmp_info.tau
                 dmp_params['alpha'] = dmp_info.alpha
@@ -98,17 +99,17 @@ class DomainClient:
                 dmp_params['phi_j'] = dmp_info.phi_j
                 dmp_params['weights'] = np.array(dmp_info.weights).reshape((dmp_info.num_dims,dmp_info.num_sensors,dmp_info.num_basis)).tolist()
                 if dmp_info.dmp_type == 0:
-                    dmp_params['quat_tau'] = dmp_info.quat_tau
-                    dmp_params['quat_alpha'] = dmp_info.quat_alpha
-                    dmp_params['quat_beta'] = dmp_info.quat_beta
-                    dmp_params['quat_num_dims'] = dmp_info.quat_num_dims
-                    dmp_params['quat_num_basis'] = dmp_info.quat_num_basis
-                    dmp_params['quat_num_sensors'] = dmp_info.quat_num_sensors
-                    dmp_params['quat_mu'] = dmp_info.quat_mu
-                    dmp_params['quat_h'] = dmp_info.quat_h
-                    dmp_params['quat_phi_j'] = dmp_info.quat_phi_j
-                    dmp_params['quat_weights'] = np.array(dmp_info.quat_weights).reshape((dmp_info.quat_num_dims,dmp_info.quat_num_basis,dmp_info.quat_num_sensors)).tolist()
-
+                    quat_dmp_params['tau'] = dmp_info.quat_tau
+                    quat_dmp_params['alpha'] = dmp_info.quat_alpha
+                    quat_dmp_params['beta'] = dmp_info.quat_beta
+                    quat_dmp_params['num_dims'] = dmp_info.quat_num_dims
+                    quat_dmp_params['num_basis'] = dmp_info.quat_num_basis
+                    quat_dmp_params['num_sensors'] = dmp_info.quat_num_sensors
+                    quat_dmp_params['mu'] = dmp_info.quat_mu
+                    quat_dmp_params['h'] = dmp_info.quat_h
+                    quat_dmp_params['phi_j'] = dmp_info.quat_phi_j
+                    quat_dmp_params['weights'] = np.array(dmp_info.quat_weights).reshape((dmp_info.quat_num_dims,dmp_info.quat_num_sensors,dmp_info.quat_num_basis)).tolist()
+                    dmp_params['quat_dmp_params'] = quat_dmp_params
                 response['dmp_params'] = dmp_params
             if label_image:
                 response = self.get_memory_objects(['request_next_image', 'object_names', 'masks', 'bounding_boxes'])

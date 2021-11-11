@@ -440,15 +440,24 @@ if __name__ == '__main__':
                         if button_inputs['Start'] == 1:
                             domain.clear_human_inputs()
 
-                            skill_params = {
-                                'duration' : 5,
-                                'dt' : 0.01,
-                                'goal_joints' : list(saved_skill_params['trajectory']['skill_state_dict']['q'][0])
-                            }
-                            skill_id = domain.run_skill('one_step_joint', json.dumps(skill_params))
+                            if saved_skill_params['dmp_params']['dmp_type'] == 0:
+                                skill_params = {
+                                    'duration' : 5,
+                                    'dt' : 0.01,
+                                    'position_dmp_params' : saved_skill_params['dmp_params'],
+                                    'quat_dmp_params' : saved_skill_params['dmp_params']['quat_dmp_params']
+                                }
+                                skill_id = domain.run_skill('one_step_quat_pose_dmp', json.dumps(skill_params))
+                            else:
+                                skill_params = {
+                                    'duration' : 5,
+                                    'dt' : 0.01,
+                                    'dmp_params' : saved_skill_params['dmp_params']
+                                }
+                                skill_id = domain.run_skill('one_step_joint_dmp', json.dumps(skill_params))
 
                             query_params = {
-                                'instruction_text' : 'The robot will first move to the starting point of the saved skill.',
+                                'instruction_text' : 'The robot will execute the saved skill.',
                                 'buttons' : [
                                     {
                                         'name' : 'Cancel',
@@ -458,41 +467,11 @@ if __name__ == '__main__':
                             }
                             query_id = domain.run_query('Execute DMP Skill 4', json.dumps(query_params))
                             (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
-
                             if skill_done:
                                 domain.cancel_query(query_id)
                                 domain.clear_human_inputs()
                                 time.sleep(1)
 
-                                skill_params = {
-                                    'duration' : 5,
-                                    'dt' : 0.01,
-                                    'dmp_params' : saved_skill_params['dmp_params']
-                                }
-                                skill_id = domain.run_skill('one_step_joint_dmp', json.dumps(skill_params))
-
-                                query_params = {
-                                    'instruction_text' : 'The robot will execute the saved skill.',
-                                    'buttons' : [
-                                        {
-                                            'name' : 'Cancel',
-                                            'text' : '',
-                                        },
-                                    ]
-                                }
-                                query_id = domain.run_query('Execute DMP Skill 5', json.dumps(query_params))
-                                (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
-                                if skill_done:
-                                    domain.cancel_query(query_id)
-                                    domain.clear_human_inputs()
-                                    time.sleep(1)
-
-                                elif query_done:
-                                    button_inputs = domain.get_memory_objects(['buttons'])['buttons']
-
-                                    if button_inputs['Cancel'] == 1:
-                                        domain.cancel_skill(skill_id)
-                                        domain.clear_human_inputs()
                             elif query_done:
                                 button_inputs = domain.get_memory_objects(['buttons'])['buttons']
 
