@@ -100,7 +100,10 @@ def params_to_bokeh_request_msg(params):
     if 'bokeh_display_type' in params:
         bokeh_msg.display_type = params['bokeh_display_type']
     if 'bokeh_traj' in params:
-        bokeh_msg.traj = params['bokeh_traj']
+        bokeh_msg.traj.time_since_skill_started = params['bokeh_traj']['time_since_skill_started']
+        bokeh_msg.traj.num_joints = params['bokeh_traj']['num_joints']
+        bokeh_msg.traj.cart_traj = params['bokeh_traj']['cart_traj']
+        bokeh_msg.traj.joint_traj = params['bokeh_traj']['joint_traj']
     if 'bokeh_image' in params:
         bokeh_msg.image = bridge.cv2_to_imgmsg(np.array(params['bokeh_image'], dtype=np.uint8))
 

@@ -25,7 +25,11 @@ if __name__ == '__main__':
                     'text' : '',
                 },
                 {
-                    'name' : 'Execute Skill',
+                    'name' : 'Replay Trajectory',
+                    'text' : '',
+                },
+                {
+                    'name' : 'Execute DMP Skill',
                     'text' : '',
                 },
                 {
@@ -173,15 +177,32 @@ if __name__ == '__main__':
                                 ],
                                 'traj1' : list(recorded_trajectory['skill_state_dict']['q'].flatten())
                             }
-
+                            
                             query_response = domain.run_query_until_done('Teaching 5', query_params)
                             button_inputs = query_response['button_inputs']
 
                             if button_inputs['Ok'] == 1:
                                 domain.clear_human_inputs()
                                 recorded_trajectory['duration'] = skill_duration
-                                domain.set_memory_objects({skill_name : recorded_trajectory})
+
+                                bokeh_traj = {}
+                                bokeh_traj['time_since_skill_started'] = list(recorded_trajectory['skill_state_dict']['time_since_skill_started'])
+                                bokeh_traj['num_joints'] = 7
+                                bokeh_traj['cart_traj'] = list(np.array(recorded_trajectory['skill_state_dict']['O_T_EE']).flatten())
+                                bokeh_traj['joint_traj'] = list(recorded_trajectory['skill_state_dict']['q'].flatten())
+
+                                query_params = {
+                                    'instruction_text' : 'Truncate the trajectory.',
+                                    'display_type' : 3,
+                                    'bokeh_display_type' : 0,
+                                    'bokeh_traj' : bokeh_traj
+                                }
+                                query_response = domain.run_query_until_done('Teaching 6', query_params)
+
+                                domain.set_memory_objects({skill_name : {'trajectory' : recorded_trajectory, 
+                                                                         'dmp_params' : query_response['dmp_params']}})
                                 domain.clear_memory(['recorded_trajectory'])
+                                domain.clear_human_inputs()
 
                             elif button_inputs['Cancel'] == 1:
                                 domain.clear_human_inputs()
@@ -194,7 +215,7 @@ if __name__ == '__main__':
             elif button_inputs['Cancel'] == 1:
                 domain.clear_human_inputs()
 
-        elif button_inputs['Execute Skill'] == 1:
+        elif button_inputs['Replay Trajectory'] == 1:
             domain.clear_human_inputs()
 
             query_params = {
@@ -218,7 +239,7 @@ if __name__ == '__main__':
                 ]
             }
 
-            query_response = domain.run_query_until_done('Execute Skill 1', query_params)
+            query_response = domain.run_query_until_done('Replay Trajectory 1', query_params)
             button_inputs = query_response['button_inputs']
             text_inputs = query_response['text_inputs']
 
@@ -247,7 +268,7 @@ if __name__ == '__main__':
                             },
                         ]
                     }
-                    query_response = domain.run_query_until_done('Execute Skill 2', query_params)
+                    query_response = domain.run_query_until_done('Replay Trajectory 2', query_params)
                     button_inputs = query_response['button_inputs']
 
                     if button_inputs['Done'] == 1:
@@ -268,7 +289,7 @@ if __name__ == '__main__':
                                 },
                             ],
                         }
-                        query_response = domain.run_query_until_done('Execute Skill 3', query_params)
+                        query_response = domain.run_query_until_done('Replay Trajectory 3', query_params)
                         button_inputs = query_response['button_inputs']
 
                         if button_inputs['Start'] == 1:
@@ -277,7 +298,7 @@ if __name__ == '__main__':
                             skill_params = {
                                 'duration' : 5,
                                 'dt' : 0.01,
-                                'goal_joints' : list(saved_skill_params['skill_state_dict']['q'][0])
+                                'goal_joints' : list(saved_skill_params['trajectory']['skill_state_dict']['q'][0])
                             }
                             skill_id = domain.run_skill('one_step_joint', json.dumps(skill_params))
 
@@ -290,16 +311,17 @@ if __name__ == '__main__':
                                     },
                                 ]
                             }
-                            query_id = domain.run_query('Execute Skill 4', json.dumps(query_params))
+                            query_id = domain.run_query('Replay Trajectory 4', json.dumps(query_params))
                             (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
 
                             if skill_done:
                                 domain.cancel_query(query_id)
                                 domain.clear_human_inputs()
+                                time.sleep(1)
 
                                 skill_params = {
                                     'dt' : 0.02,
-                                    'traj' : saved_skill_params['skill_state_dict']['q'].tolist()
+                                    'traj' : saved_skill_params['trajectory']['skill_state_dict']['q'].tolist()
                                 }
                                 skill_id = domain.run_skill('stream_joint_traj', json.dumps(skill_params))
 
@@ -312,11 +334,158 @@ if __name__ == '__main__':
                                         },
                                     ]
                                 }
-                                query_id = domain.run_query('Execute Skill 5', json.dumps(query_params))
+                                query_id = domain.run_query('Replay Trajectory 5', json.dumps(query_params))
                                 (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
                                 if skill_done:
                                     domain.cancel_query(query_id)
                                     domain.clear_human_inputs()
+                                    time.sleep(1)
+
+                                elif query_done:
+                                    button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+
+                                    if button_inputs['Cancel'] == 1:
+                                        domain.cancel_skill(skill_id)
+                                        domain.clear_human_inputs()
+                            elif query_done:
+                                button_inputs = domain.get_memory_objects(['buttons'])['buttons']
+
+                                if button_inputs['Cancel'] == 1:
+                                    domain.cancel_skill(skill_id)
+                                    domain.clear_human_inputs()
+
+                        elif button_inputs['Cancel'] == 1:
+                            domain.clear_human_inputs()
+                    elif button_inputs['Cancel'] == 1:
+                        domain.clear_human_inputs()        
+            elif button_inputs['Cancel'] == 1:
+                domain.clear_human_inputs()
+        elif button_inputs['Execute DMP Skill'] == 1:
+            domain.clear_human_inputs()
+
+            query_params = {
+                'instruction_text' : 'Enter the name of the skill. Then hold onto the robot and press Start.',
+                'buttons' : [
+                    {
+                        'name' : 'Start',
+                        'text' : '',
+                    },
+                    {
+                        'name' : 'Cancel',
+                        'text' : '',
+                    },
+                ],
+                'text_inputs' : [
+                    {
+                        'name' : 'skill_name',
+                        'text' : 'Skill Name',
+                        'value' : '',
+                    },
+                ]
+            }
+
+            query_response = domain.run_query_until_done('Execute DMP Skill 1', query_params)
+            button_inputs = query_response['button_inputs']
+            text_inputs = query_response['text_inputs']
+
+            if button_inputs['Start'] == 1:
+                domain.clear_human_inputs()
+                skill_name = text_inputs['skill_name']
+                saved_skill_params = domain.get_memory_objects([skill_name])[skill_name]
+                if saved_skill_params is not None:
+
+                    skill_params = {
+                        'duration' : 10,
+                        'dt' : 0.01
+                    }
+                    skill_id = domain.run_skill('zero_force', json.dumps(skill_params))
+
+                    query_params = {
+                        'instruction_text' : 'Move the Robot to the Starting Position and Press Done when Completed.',
+                        'buttons' : [
+                            {
+                                'name' : 'Done',
+                                'text' : '',
+                            },
+                            {
+                                'name' : 'Cancel',
+                                'text' : '',
+                            },
+                        ]
+                    }
+                    query_response = domain.run_query_until_done('Execute DMP Skill 2', query_params)
+                    button_inputs = query_response['button_inputs']
+
+                    if button_inputs['Done'] == 1:
+                        domain.clear_human_inputs()
+                        if domain.get_skill_status(skill_id) == 'running':
+                            domain.cancel_skill(skill_id)
+
+                        query_params = {
+                            'instruction_text' : 'Press Start when you are safely away from the robot.',
+                            'buttons' : [
+                                {
+                                    'name' : 'Start',
+                                    'text' : '',
+                                },
+                                {
+                                    'name' : 'Cancel',
+                                    'text' : '',
+                                },
+                            ],
+                        }
+                        query_response = domain.run_query_until_done('Execute DMP Skill 3', query_params)
+                        button_inputs = query_response['button_inputs']
+
+                        if button_inputs['Start'] == 1:
+                            domain.clear_human_inputs()
+
+                            skill_params = {
+                                'duration' : 5,
+                                'dt' : 0.01,
+                                'goal_joints' : list(saved_skill_params['trajectory']['skill_state_dict']['q'][0])
+                            }
+                            skill_id = domain.run_skill('one_step_joint', json.dumps(skill_params))
+
+                            query_params = {
+                                'instruction_text' : 'The robot will first move to the starting point of the saved skill.',
+                                'buttons' : [
+                                    {
+                                        'name' : 'Cancel',
+                                        'text' : '',
+                                    },
+                                ]
+                            }
+                            query_id = domain.run_query('Execute DMP Skill 4', json.dumps(query_params))
+                            (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
+
+                            if skill_done:
+                                domain.cancel_query(query_id)
+                                domain.clear_human_inputs()
+                                time.sleep(1)
+
+                                skill_params = {
+                                    'duration' : 5,
+                                    'dt' : 0.01,
+                                    'dmp_params' : saved_skill_params['dmp_params']
+                                }
+                                skill_id = domain.run_skill('one_step_joint_dmp', json.dumps(skill_params))
+
+                                query_params = {
+                                    'instruction_text' : 'The robot will execute the saved skill.',
+                                    'buttons' : [
+                                        {
+                                            'name' : 'Cancel',
+                                            'text' : '',
+                                        },
+                                    ]
+                                }
+                                query_id = domain.run_query('Execute DMP Skill 5', json.dumps(query_params))
+                                (skill_done, query_done) = domain.wait_until_skill_or_query_done(skill_id, query_id)
+                                if skill_done:
+                                    domain.cancel_query(query_id)
+                                    domain.clear_human_inputs()
+                                    time.sleep(1)
 
                                 elif query_done:
                                     button_inputs = domain.get_memory_objects(['buttons'])['buttons']

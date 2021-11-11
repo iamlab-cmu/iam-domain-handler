@@ -1,5 +1,6 @@
 import time
 import json
+import numpy as np
 
 from iam_domain_handler.human_client import HumanClient
 from .state_client import StateClient
@@ -45,6 +46,7 @@ class DomainClient:
         has_buttons = ('buttons' in query_param.keys())
         has_sliders = ('sliders' in query_param.keys())
         has_text_inputs = ('text_inputs' in query_param.keys())
+        has_dmp_params = ('bokeh_display_type' in query_param.keys() and query_param['bokeh_display_type'] == 0)
         label_image = ('bokeh_display_type' in query_param.keys() and query_param['bokeh_display_type'] == 1)
         has_points = ('bokeh_display_type' in query_param.keys() and query_param['bokeh_display_type'] == 2)
 
@@ -56,6 +58,7 @@ class DomainClient:
         while not query_complete:
             while not query_result:
                 self.cancel_query(query_id)
+                time.sleep(1)
                 query_id = self.run_query(query_name, json.dumps(query_param))
                 query_result = self.wait_until_query_done(query_id, timeout)
 
@@ -80,6 +83,33 @@ class DomainClient:
                         query_result = False
                         continue
                 response['text_inputs'] = text_inputs
+            if has_dmp_params:
+                dmp_info = self.get_memory_objects(['dmp_params'])['dmp_params']
+                dmp_params = {}
+                dmp_params['dmp_type'] = dmp_info.dmp_type
+                dmp_params['tau'] = dmp_info.tau
+                dmp_params['alpha'] = dmp_info.alpha
+                dmp_params['beta'] = dmp_info.beta
+                dmp_params['num_dims'] = dmp_info.num_dims
+                dmp_params['num_basis'] = dmp_info.num_basis
+                dmp_params['num_sensors'] = dmp_info.num_sensors
+                dmp_params['mu'] = dmp_info.mu
+                dmp_params['h'] = dmp_info.h
+                dmp_params['phi_j'] = dmp_info.phi_j
+                dmp_params['weights'] = np.array(dmp_info.weights).reshape((dmp_info.num_dims,dmp_info.num_sensors,dmp_info.num_basis)).tolist()
+                if dmp_info.dmp_type == 0:
+                    dmp_params['quat_tau'] = dmp_info.quat_tau
+                    dmp_params['quat_alpha'] = dmp_info.quat_alpha
+                    dmp_params['quat_beta'] = dmp_info.quat_beta
+                    dmp_params['quat_num_dims'] = dmp_info.quat_num_dims
+                    dmp_params['quat_num_basis'] = dmp_info.quat_num_basis
+                    dmp_params['quat_num_sensors'] = dmp_info.quat_num_sensors
+                    dmp_params['quat_mu'] = dmp_info.quat_mu
+                    dmp_params['quat_h'] = dmp_info.quat_h
+                    dmp_params['quat_phi_j'] = dmp_info.quat_phi_j
+                    dmp_params['quat_weights'] = np.array(dmp_info.quat_weights).reshape((dmp_info.quat_num_dims,dmp_info.quat_num_basis,dmp_info.quat_num_sensors)).tolist()
+
+                response['dmp_params'] = dmp_params
             if label_image:
                 response = self.get_memory_objects(['request_next_image', 'object_names', 'masks', 'bounding_boxes'])
             if has_points:

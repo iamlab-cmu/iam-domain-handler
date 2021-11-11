@@ -22,7 +22,8 @@ if __name__ == '__main__':
         'record_trajectory': RecordSkill(),
         'stream_joint_traj': StreamJointTrajSkill(),
         'one_step_joint': GoToJointsSkill(),
-        'one_step_pose': GoToPoseSkill()
+        'one_step_pose': GoToPoseSkill(),
+        'one_step_joint_dmp': JointDmpSkill()
     }
     server = RobotServer(skills_dict)
     

@@ -43,12 +43,14 @@ class HumanServer:
             self._bokeh_request_pub.publish(bokeh_msg)
         rospy.loginfo('Published query message to human interface...')
 
-        query_not_done = False 
+        query_done = False 
         rate = rospy.Rate(10)
-        while not query_not_done:
+        current_status = self._action_registry_client.get_action_status(req.query_id)
+        while not query_done and current_status == 'running':
+            current_status = self._action_registry_client.get_action_status(req.query_id)
             query_done_dict = self._memory_client.get_memory_objects(['query_done'])
             if query_done_dict is not None and query_done_dict['query_done'] is not None:
-                query_not_done = query_done_dict['query_done'] > 0
+                query_done = query_done_dict['query_done'] > 0
             rate.sleep()
         rospy.loginfo('Successfully querying human interface and got query_done...')
         self._action_registry_client.set_action_status(req.query_id, 'success')
