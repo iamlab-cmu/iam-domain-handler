@@ -753,7 +753,9 @@ if __name__ == '__main__':
 
                         if button_inputs['Joint'] == 1:
                             domain.clear_human_inputs()
-
+                            
+                            print(list(saved_point_trajectory_points['joint_positions'][0])
+                                  
                             skill_params = {
                                 'duration' : 5,
                                 'dt' : 0.01,
@@ -790,6 +792,8 @@ if __name__ == '__main__':
                                 query_id = domain.run_query('Replay Point Trajectory 5', json.dumps(query_params))
 
                                 for point_num in range(1,len(saved_point_trajectory_points['joint_positions'])):
+                                    print(list(saved_point_trajectory_points['joint_positions'][point_num])
+                                    
                                     skill_params = {
                                         'duration' : 5,
                                         'dt' : 0.01,
@@ -826,6 +830,8 @@ if __name__ == '__main__':
                             ee_pose = RigidTransform(rotation=qt.as_rotation_matrix(qt.from_float_array(np.array(saved_point_trajectory_points['ee_quaternions'][0]))), 
                                                      translation=np.array(saved_point_trajectory_points['ee_positions'][0]))
 
+                            print(ee_pose)
+                                          
                             skill_params = {
                                 'duration' : 5,
                                 'dt' : 0.01,
@@ -865,6 +871,8 @@ if __name__ == '__main__':
                                     ee_pose = RigidTransform(rotation=qt.as_rotation_matrix(qt.from_float_array(np.array(saved_point_trajectory_points['ee_quaternions'][point_num]))), 
                                                              translation=np.array(saved_point_trajectory_points['ee_positions'][point_num]))
 
+                                    print(ee_pose)
+                                          
                                     skill_params = {
                                         'duration' : 5,
                                         'dt' : 0.01,
