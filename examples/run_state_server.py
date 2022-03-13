@@ -21,10 +21,19 @@ def robot_state_handler(data):
         'frame:franka:gripper/is_grasped': [data.gripper_is_grasped],
     }
 
+def aruco_handler(data):
+    ee_pos = np.array([data.position.x, data.position.y, data.position.z])
+    ee_quat = np.array([data.orientation.x, data.orientation.y, data.orientation.z, data.orientation.w])
+    return {
+        'frame:block:ee:pose/position': ee_pos,
+        'frame:block:ee:pose/quaternion': ee_quat
+    }
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':[ 0.41569083, -0.25251649,  0.24636923]
     sub_handlers = [
-        ('/robot_state_publisher_node_1/robot_state', RobotState, robot_state_handler)
+        ('/robot_state_publisher_node_1/robot_state', RobotState, robot_state_handler),
+        ('/aruco_simple/pose', Pose, aruco_handler)
     ]
     state_server = StateServer(sub_handlers)
     

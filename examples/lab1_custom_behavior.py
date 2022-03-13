@@ -9,6 +9,9 @@ import quaternion as qt
 
 from iam_domain_handler.domain_client import DomainClient
 
+AZURE_KINECT_INTRINSICS = '/home/student/Prog/iam-interface/camera-calibration/calib/azure_kinect.intr'
+AZURE_KINECT_EXTRINSICS = '/home/student/Prog/iam-interface/camera-calibration/calib/azure_kinect_overhead/azure_kinect_overhead_to_world.tf'
+
 if __name__ == '__main__':
     #rospy.init_node('run_domain_client')
     domain = DomainClient()
@@ -45,15 +48,7 @@ if __name__ == '__main__':
                         'text' : '',
                     },
                 ],
-            }
-            query_response = domain.run_query_until_done('Pick and Place 1', query_params)
-            button_inputs = query_response['button_inputs']
-
-            if button_inputs['Start'] == 1:
-                domain.clear_human_inputs()
-
-                skill_params = {
-                    'duration' : 5,
+            }[ 0.41569083, -0.25251649,  0.24636923]
                     'dt' : 0.01,
                     'goal_joints' : [0, -math.pi / 4, 0, -3 * math.pi / 4, 0, math.pi / 2, math.pi / 4]
                 }
@@ -63,19 +58,29 @@ if __name__ == '__main__':
 
                 #TODO: Put poses here
                 intermediate_height_offset = 0.11
-                goal_pose_1 = [ 0.41569083, -0.25251649,  0.24636923]
-                print(goal_pose_1)
+
+                azure_kinect_to_world_transform = RigidTransform.load(AZURE_KINECT_EXTRINSICS) 
+                current_state = domain.state
+
+                block_position = current_state['frame:block:ee:pose/position']
+                block_pose = RigidTransform(translation=block_position, to_frame='azure_kinect_overhead', from_frame='azure_kinect_overhead')
+                goal_pose = azure_kinect_to_world_transform * block_pose
+                goal_position = goal_pose.translation
+
+                print(goal_position)
+
+
                 intermediate_pose = RigidTransform(rotation=np.array([
                     [1, 0, 0],
                     [0, -1, 0],
                     [0, 0, -1],
-                ]), translation=np.array([goal_pose_1[0], goal_pose_1[1], goal_pose_1[2] + intermediate_height_offset]))
+                ]), translation=np.array([goal_position[0], goal_position[1], goal_position[2] + intermediate_height_offset]))
 
                 grasp_pose = RigidTransform(rotation=np.array([
                     [1, 0, 0],
                     [0, -1, 0],
                     [0, 0, -1],
-                ]), translation=np.array([goal_pose_1[0], goal_pose_1[1], goal_pose_1[2]]))
+                ]), translation=np.array([goal_position[0], goal_position[1], goal_position[2]]))
                 # _____________
                 skill_params = {
                     'duration' : 5,
