@@ -63,6 +63,10 @@ if __name__ == '__main__':
                 skill_id = domain.run_skill('one_step_joint', json.dumps(skill_params))
 
                 domain.wait_until_skill_done(skill_id)
+
+                skill_id = domain.run_skill('open_gripper', '')
+                domain.wait_until_skill_done(skill_id)
+
                 intermediate_height_offset = 0.11
 
                 azure_kinect_to_world_transform = RigidTransform.load(AZURE_KINECT_EXTRINSICS) 
