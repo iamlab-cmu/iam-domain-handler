@@ -49,6 +49,9 @@ def bokeh_server_response_handler(data):
         'dmp_params' : data.dmp_params,
         'desired_positions' : data.desired_positions,
         'bounding_boxes' : data.bounding_boxes,
+        'query_type' : data.query_type,
+        'query_response' : data.query_response,
+        'query_point' : [data.query_point.x, data.query_point.y],
         'query_done' : True,
     }
 

@@ -49,6 +49,7 @@ class DomainClient:
         has_dmp_params = ('bokeh_display_type' in query_param.keys() and query_param['bokeh_display_type'] == 0)
         label_image = ('bokeh_display_type' in query_param.keys() and query_param['bokeh_display_type'] == 1)
         has_points = ('bokeh_display_type' in query_param.keys() and query_param['bokeh_display_type'] == 2)
+        has_query = ('bokeh_display_type' in query_param.keys() and query_param['bokeh_display_type'] == 3)
 
         query_id = self.run_query(query_name, json.dumps(query_param))
         query_result = self.wait_until_query_done(query_id, timeout)
@@ -115,6 +116,8 @@ class DomainClient:
                 response = self.get_memory_objects(['request_next_image', 'object_names', 'masks', 'bounding_boxes'])
             if has_points:
                 response = self.get_memory_objects(['object_names', 'desired_positions'])
+            if has_query:
+                response = self.get_memory_objects(['query_type', 'query_response', 'query_point'])
             query_complete = True
 
         return response

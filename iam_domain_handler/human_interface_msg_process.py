@@ -106,5 +106,15 @@ def params_to_bokeh_request_msg(params):
         bokeh_msg.traj.joint_traj = params['bokeh_traj']['joint_traj']
     if 'bokeh_image' in params:
         bokeh_msg.image = bridge.cv2_to_imgmsg(np.array(params['bokeh_image'], dtype=np.uint8))
+    if 'pizza' in params:
+        bokeh_msg.pizza.query_type = params['pizza']['query_type']
+        bokeh_msg.pizza.pizza_diameter = params['pizza']['pizza_diameter']
+        bokeh_msg.pizza.crust_thickness = params['pizza']['crust_thickness']
+        bokeh_msg.pizza.topping_diameter = params['pizza']['topping_diameter']
+        bokeh_msg.pizza.pizza_topping_positions_1_x = params['pizza']['pizza_topping_positions_1_x']
+        bokeh_msg.pizza.pizza_topping_positions_1_y = params['pizza']['pizza_topping_positions_1_y']
+        if bokeh_msg.pizza.query_type == 0:
+            bokeh_msg.pizza.pizza_topping_positions_2_x = params['pizza']['pizza_topping_positions_2_x']
+            bokeh_msg.pizza.pizza_topping_positions_2_y = params['pizza']['pizza_topping_positions_2_y']
 
     return bokeh_msg
